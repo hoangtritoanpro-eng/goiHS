@@ -232,6 +232,11 @@
             <button type="submit" class="btn btn-add">Thêm Mới</button>
         </form>
 
+        <form class="add-form" id="settingsForm" style="background-color: #F0F8FF; border-left: 6px solid #007AFF; margin-bottom: 20px;">
+            <input type="text" id="ngrokUrl" placeholder="🔗 Dán link ngrok vào đây (vd: https://1234.ngrok-free.app/tts)" style="flex: 1;">
+            <button type="button" class="btn btn-add" style="background-color: #007AFF;" onclick="saveNgrokUrl()">Cập nhật Link AI Voice</button>
+        </form>
+
         <div class="filter-bar">
             <button class="filter-btn active" onclick="setFilter('all', this)">Tất cả</button>
             <button class="filter-btn" onclick="setFilter('waiting', this)">Đang trong lớp</button>
@@ -617,6 +622,31 @@
             };
             reader.readAsArrayBuffer(file);
         }
+
+        const settingsRef = database.ref('settings');
+        
+        // Tải đường dẫn ngrok cũ nếu có
+        settingsRef.child('ttsUrl').on('value', snap => {
+            const val = snap.val();
+            if (val) {
+                document.getElementById('ngrokUrl').value = val;
+            }
+        });
+
+        window.saveNgrokUrl = function() {
+            let url = document.getElementById('ngrokUrl').value.trim();
+            if (url && !url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+            // Loại bỏ dấu gạch chéo cuối nếu có
+            if (url.endsWith('/')) url = url.slice(0, -1);
+
+            settingsRef.update({ ttsUrl: url }).then(() => {
+                alert("Đã lưu đường dẫn Ngrok thành công! Các máy Trạm và Lớp học sẽ tự động nhận link này.");
+            }).catch(err => {
+                alert("Lỗi khi lưu link ngrok: " + err.message);
+            });
+        };
     </script>
 </body>
 </html>

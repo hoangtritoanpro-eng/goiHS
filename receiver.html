@@ -271,9 +271,15 @@
         const audioQueue = [];
         let isPlaying = false;
 
+        let currentTtsUrl = 'http://127.0.0.1:5000';
+        database.ref('settings/ttsUrl').on('value', snap => {
+            const val = snap.val();
+            if (val) currentTtsUrl = val;
+        });
+
         async function prefetchBlobAndPlay(text) {
             try {
-                const response = await fetch(`http://127.0.0.1:5000/tts?text=${encodeURIComponent(text)}`);
+                const response = await fetch(`${currentTtsUrl}/tts?text=${encodeURIComponent(text)}`);
                 if (!response.ok) throw new Error("Network response was not ok");
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
