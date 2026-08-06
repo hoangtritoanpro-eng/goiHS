@@ -464,6 +464,11 @@
             database.ref('settings').update({ ignoreWaitTime: isChecked });
         }
 
+        // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
+        const globalAudioPlayer = new Audio();
+        globalAudioPlayer.style.display = 'none';
+        document.body.appendChild(globalAudioPlayer);
+
         // Lấy quyền Audio từ click đầu tiên trên body
         document.body.addEventListener('click', () => {
             if(!isStarted) {
@@ -475,8 +480,12 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.001);
 
-                // Mở khóa luôn cả SpeechSynthesis cho iOS / Safari
+                // Mở khóa SpeechSynthesis
                 window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+                
+                // Mở khóa HTML5 Audio Player (cho iOS Safari)
+                globalAudioPlayer.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; // âm thanh rỗng siêu ngắn
+                globalAudioPlayer.play().catch(e => console.log('Unlock audio failed', e));
             }
         }, {once: true});
 
@@ -517,10 +526,10 @@
                 
                 return {
                     play: (onEnd, onError) => {
-                        const audio = new Audio(url);
-                        audio.onended = onEnd;
-                        audio.onerror = onError;
-                        audio.play().catch(onError);
+                        globalAudioPlayer.src = url;
+                        globalAudioPlayer.onended = onEnd;
+                        globalAudioPlayer.onerror = onError;
+                        globalAudioPlayer.play().catch(onError);
                     }
                 };
             } catch (error) {

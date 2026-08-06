@@ -290,10 +290,10 @@
                 
                 return {
                     play: (onEnd, onError) => {
-                        const audio = new Audio(url);
-                        audio.onended = onEnd;
-                        audio.onerror = onError;
-                        audio.play().catch(onError);
+                        globalAudioPlayer.src = url;
+                        globalAudioPlayer.onended = onEnd;
+                        globalAudioPlayer.onerror = onError;
+                        globalAudioPlayer.play().catch(onError);
                     }
                 };
             } catch (error) {
@@ -358,6 +358,11 @@
             }
         }
 
+        // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
+        const globalAudioPlayer = new Audio();
+        globalAudioPlayer.style.display = 'none';
+        document.body.appendChild(globalAudioPlayer);
+
         // Bắt sự kiện bấm nút Bắt Đầu
         startBtn.addEventListener('click', () => {
             // Mở khóa AudioContext và SpeechSynthesis cho trình duyệt di động (iOS Safari)
@@ -367,6 +372,10 @@
             osc.start();
             osc.stop(ctx.currentTime + 0.001);
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+
+            // Mở khóa HTML5 Audio Player (cho iOS Safari)
+            globalAudioPlayer.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; // âm thanh rỗng siêu ngắn
+            globalAudioPlayer.play().catch(e => console.log('Unlock audio failed', e));
 
             // Bypass chính sách chặn audio tự động phát của Safari/Chrome
             // Bằng cách phát 1 câu tĩnh ngay trong callback click user
