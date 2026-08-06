@@ -17,7 +17,7 @@ CUSTOM_VOICE_FILE = "y_custom_voice.mp3"
 CUSTOM_VOICE_NAME = "giao_vien_custom"
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "ngrok-skip-browser-warning", "X-Pinggy-No-Screen", "Bypass-Tunnel-Reminder"]}})
 
 print("Dang khoi tao mo hinh VieNeu-TTS... Vui long doi trong giay lat.")
 try:
