@@ -468,6 +468,9 @@
                 osc.connect(ctx.destination);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.001);
+
+                // Mở khóa luôn cả SpeechSynthesis cho iOS / Safari
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
             }
         }, {once: true});
 
@@ -496,19 +499,33 @@
         let isPlaying = false;
 
         async function prefetchBlobAndPlay(text) {
-            const response = await fetch(`http://localhost:5000/tts?text=${encodeURIComponent(text)}`);
-            if (!response.ok) throw new Error("Network response was not ok");
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            
-            return {
-                play: (onEnd, onError) => {
-                    const audio = new Audio(url);
-                    audio.onended = onEnd;
-                    audio.onerror = onError;
-                    audio.play().catch(onError);
-                }
-            };
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/tts?text=${encodeURIComponent(text)}`);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                return {
+                    play: (onEnd, onError) => {
+                        const audio = new Audio(url);
+                        audio.onended = onEnd;
+                        audio.onerror = onError;
+                        audio.play().catch(onError);
+                    }
+                };
+            } catch (error) {
+                console.warn("Không kết nối được server TTS local, dùng giọng đọc mặc định của trình duyệt.", error);
+                return {
+                    play: (onEnd, onError) => {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'vi-VN';
+                        utterance.rate = 0.9;
+                        utterance.onend = onEnd;
+                        utterance.onerror = onError;
+                        window.speechSynthesis.speak(utterance);
+                    }
+                };
+            }
         }
 
         async function playNextInQueue() {

@@ -4,6 +4,13 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.11.0] - 2026-08-06
+
+### Fixed (Đã sửa)
+- **Sửa lỗi không phát âm thanh khi deploy lên Vercel**: Thêm tính năng dự phòng (fallback). Khi ứng dụng không kết nối được đến máy chủ TTS cục bộ (127.0.0.1:5000), hệ thống sẽ tự động chuyển sang sử dụng giọng đọc mặc định của trình duyệt (`window.speechSynthesis`), giúp hệ thống vẫn phát âm thanh bình thường trên môi trường production.
+
+---
+
 ## [1.10.0] - 2026-08-03
 
 ### Added (Đã thêm)
