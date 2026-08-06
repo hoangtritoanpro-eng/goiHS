@@ -250,18 +250,18 @@
                 
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(659.25, ctx.currentTime); // Note E5
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.2); // Note A5 (để tạo tiếng ting-toong)
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // Note A5 (để tạo tiếng ting-toong)
                 
                 gainNode.gain.setValueAtTime(0, ctx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.05);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
                 
                 osc.start();
-                osc.stop(ctx.currentTime + 0.8);
+                osc.stop(ctx.currentTime + 0.3);
                 
                 setTimeout(() => {
                     if (callback) callback();
-                }, 900);
+                }, 350);
             } catch (e) {
                 console.error("Audio API error:", e);
                 if (callback) callback(); // Dự phòng nếu lỗi
@@ -595,13 +595,12 @@
                             classClean = ' ' + parts.map(p => numMap[p] || p).join(' ');
                         }
                     }
-                    
-                    speak(`Mời ${data.name}${classClean}.`);
+                    speak(`${data.name}${classClean}.`);
                 } else {
                     updateWaitStatusUI(data.id, true, data.className);
                 }
             });
-        }, 1000);
+        }, 300);
 
         // Logic cảnh báo quá 5 phút (300,000 ms)
         setInterval(() => {
