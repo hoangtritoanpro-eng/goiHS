@@ -279,7 +279,11 @@
 
         async function prefetchBlobAndPlay(text) {
             try {
-                const response = await fetch(`${currentTtsUrl}/tts?text=${encodeURIComponent(text)}`);
+                const response = await fetch(`${currentTtsUrl}/tts?text=${encodeURIComponent(text)}`, {
+                    headers: {
+                        "ngrok-skip-browser-warning": "true"
+                    }
+                });
                 if (!response.ok) throw new Error("Network response was not ok");
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
