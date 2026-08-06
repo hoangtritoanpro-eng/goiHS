@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sổ Tay Hướng Dẫn Sử Dụng - Solo Builder</title>
+  
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- MermaidJS for interactive diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      theme: 'dark',
+      startOnLoad: true,
+      securityLevel: 'loose',
+      themeVariables: {
+        background: '#111827',
+        primaryColor: '#3B82F6',
+        primaryTextColor: '#F3F4F6',
+        lineColor: '#6B7280'
+      }
+    });
+  </script>
+
+  <style>
+    /* Clean Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Core Style Tokens */
+    :root {
+      --bg-dark: #070D19;
+      --bg-card: rgba(17, 24, 39, 0.7);
+      --bg-card-hover: rgba(31, 41, 55, 0.8);
+      --border-color: rgba(55, 65, 81, 0.5);
+      --border-hover: rgba(59, 130, 246, 0.5);
+      
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --text-bright: #FFFFFF;
+      
+      --accent-cyan: #06B6D4;
+      --accent-blue: #3B82F6;
+      --accent-violet: #8B5CF6;
+      --accent-green: #10B981;
+      --accent-orange: #F59E0B;
+      --accent-red: #EF4444;
+      
+      --font-heading: 'Outfit', 'Inter', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+      --shadow-glow-blue: 0 0 25px rgba(59, 130, 246, 0.2);
+    }
+    
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.625;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+    
+    /* Scrollbar Optimization */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #030712;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4B5563;
+    }
+    
+    /* Layout */
+    .app-container {
+      display: flex;
+      max-width: 1540px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 320px;
+      background: rgba(10, 17, 32, 0.85);
+      border-right: 1px solid var(--border-color);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      margin-bottom: 3rem;
+    }
+    
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-bright);
+      font-size: 1.35rem;
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .logo-text h1 {
+      font-family: var(--font-heading);
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #FFFFFF, #93C5FD);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .logo-text p {
+      font-size: 0.725rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-top: 0.125rem;
+    }
+    
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-grow: 1;
+    }
+    
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.875rem 1.125rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.935rem;
+      font-weight: 500;
+      transition: all 0.25s ease;
+      border: 1px solid transparent;
+    }
+    
+    .nav-item a:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+    }
+    
+    .nav-item.active a {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-cyan);
+      border-color: rgba(6, 182, 212, 0.2);
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.05);
+    }
+    
+    .nav-item i {
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .sidebar-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      margin-top: auto;
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      flex-grow: 1;
+      padding: 3rem 4rem;
+      max-width: calc(100% - 320px);
+    }
+    
+    /* Document Header */
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 2rem;
+    }
+    
+    .doc-title h2 {
+      font-family: var(--font-heading);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.03em;
+    }
+    
+    .doc-title p {
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-size: 1.05rem;
+    }
+    
+    .badge {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--accent-cyan);
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.775rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Sections styling */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 3.5rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      scroll-margin-top: 2rem;
+    }
+    
+    .section-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow-blue);
+    }
+    
+    .section-icon {
+      font-size: 2rem;
+      color: var(--accent-cyan);
+      margin-bottom: 1.25rem;
+    }
+    
+    .section-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .section-card h3 span {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 1.25rem;
+    }
+    
+    .section-card p {
+      color: var(--text-main);
+      margin-bottom: 1.5rem;
+      font-size: 1.025rem;
+    }
+    
+    /* Code and CLI styling */
+    .cli-box {
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: var(--text-bright);
+      position: relative;
+      margin: 1.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .cli-text {
+      color: var(--accent-cyan);
+    }
+    
+    .btn-copy {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.825rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-copy:hover {
+      background: var(--accent-cyan);
+      color: var(--bg-dark);
+      border-color: var(--accent-cyan);
+    }
+    
+    /* Alerts box styles */
+    .alert-box {
+      border-left: 4px solid transparent;
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.75rem 0;
+      background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .alert-box.info {
+      border-left-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.04);
+    }
+    
+    .alert-box.tip {
+      border-left-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.04);
+    }
+    
+    .alert-box.warning {
+      border-left-color: var(--accent-orange);
+      background: rgba(245, 158, 11, 0.04);
+    }
+    
+    .alert-title {
+      font-weight: 600;
+      font-family: var(--font-heading);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+    
+    .alert-box.info .alert-title { color: var(--accent-blue); }
+    .alert-box.tip .alert-title { color: var(--accent-green); }
+    .alert-box.warning .alert-title { color: var(--accent-orange); }
+    
+    .alert-content {
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+    
+    /* Interactive Step Grid */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .step-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .step-card:hover {
+      background: rgba(255, 255, 255, 0.03);
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.08);
+    }
+    
+    .step-num {
+      position: absolute;
+      top: -10px;
+      right: 5px;
+      font-size: 5rem;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.03);
+      font-family: var(--font-heading);
+      line-height: 1;
+    }
+    
+    .step-card h4 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .step-card h4 i {
+      color: var(--accent-cyan);
+    }
+    
+    .step-card p {
+      font-size: 0.925rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+    
+    /* Folder tree design */
+    .folder-tree {
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-main);
+      overflow-x: auto;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .tree-comment {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    
+    .tree-highlight {
+      color: var(--accent-cyan);
+      font-weight: 500;
+    }
+    
+    .tree-highlight-orange {
+      color: var(--accent-orange);
+      font-weight: 500;
+    }
+    
+    /* Mermaid diagram container */
+    .diagram-container {
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2rem 0;
+    }
+    
+    /* Grid structure table */
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+      text-align: left;
+    }
+    
+    .custom-table th {
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      padding: 0.875rem 1rem;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    
+    .custom-table td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      color: var(--text-main);
+    }
+    
+    .custom-table tbody tr:hover {
+      background: rgba(255,255,255,0.01);
+    }
+    
+    /* Responsive Design adjustments */
+    @media (max-width: 1024px) {
+      .app-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 2rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .logo-area {
+        margin-bottom: 1.5rem;
+      }
+      .main-content {
+        max-width: 100%;
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Solo Builder</h1>
+          <p>Starter Kit Guide</p>
+        </div>
+      </div>
+      
+      <nav class="nav-list">
+        <li class="nav-item active"><a href="#intro"><i class="fa-solid fa-circle-info"></i> Giới thiệu</a></li>
+        <li class="nav-item"><a href="#structure"><i class="fa-solid fa-folder-tree"></i> Cấu trúc thư mục</a></li>
+        <li class="nav-item"><a href="#installation"><i class="fa-solid fa-cube"></i> Hướng dẫn cài đặt</a></li>
+        <li class="nav-item"><a href="#lifecycle"><i class="fa-solid fa-arrows-spin"></i> Vòng đời phát triển</a></li>
+        <li class="nav-item"><a href="#discipline"><i class="fa-solid fa-scale-balanced"></i> Kỷ luật quản lý</a></li>
+        <li class="nav-item"><a href="#prompts"><i class="fa-solid fa-terminal"></i> Mẫu câu lệnh AI</a></li>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <p>Bản quyền © 2026 Sky-Line School</p>
+        <p style="margin-top: 0.25rem; opacity: 0.6;">Phiên bản v1.0.3 • Hoàn thiện 05/2026</p>
+      </div>
+    </aside>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Title Bar -->
+      <header class="doc-header">
+        <div class="doc-title">
+          <h2>Sổ Tay Hướng Dẫn Quy Trình Solo Builder</h2>
+          <p>Thiết lập kỷ cương, chia phase phát triển và điều khiển AI Agent chất lượng cao</p>
+        </div>
+        <div class="badge">PRO WORKFLOW</div>
+      </header>
+      
+      <!-- Section 1: Giới thiệu -->
+      <section id="intro" class="section-card">
+        <div class="section-icon"><i class="fa-solid fa-seedling"></i></div>
+        <h3>1. Giới thiệu triết lý Solo Builder</h3>
+        <p>
+          <strong>Solo Builder</strong> là một quy trình làm việc phát triển phần mềm cực kỳ có kỷ luật, được tối ưu hóa đặc biệt cho mối quan hệ cộng tác giữa <strong>Nhà phát triển (Con người) & AI Coding Agent (Máy)</strong>. 
+        </p>
+        <p>
+          Khi làm việc với các AI Agent tự trị trong các dự án thực tế, các nhà phát triển thường gặp các vấn đề lớn: AI tự ý viết lại code lung tung phá vỡ tính năng cũ (Code Drift), AI bị loãng thông tin khi dự án quá to (Context Bloat), hay việc code chạy tốt nhưng hoàn toàn không có tài liệu và commit rối rắm.
+        </p>
+        <p>
+          Quy trình này giải quyết triệt để các vấn đề trên bằng cách định hình AI hoạt động trong một khuôn khổ tuần tự, chia nhỏ các phase độc lập, bắt buộc lên plan chi tiết trước khi code, thiết lập cơ chế nghiệm thu rõ ràng và liên tục đồng bộ trạng thái vào Changelog và Git.
+        </p>
+        
+        <div class="alert-box tip">
+          <div class="alert-title"><i class="fa-solid fa-lightbulb"></i> LỢI ÍCH CỐT LÕI</div>
+          <div class="alert-content">
+            Quy trình giữ cho context window của AI luôn tập trung vào đúng Phase hiện tại, giúp tiết kiệm số lượng Token tiêu thụ và hạn chế tối đa các bug phát sinh chéo do sửa đổi file ngoài phạm vi cho phép.
+          </div>
+        </div>
+      </section>
+      
+      <!-- Section 2: Cấu trúc thư mục -->
+      <section id="structure" class="section-card">
+        <div class="section-icon"><i class="fa-solid fa-network-wired"></i></div>
+        <h3>2. Cấu trúc thư mục tài liệu</h3>
+        <p>
+          Mọi dự án áp dụng quy trình Solo Builder sẽ lưu trữ thông tin trạng thái đồng bộ tại thư mục gốc của dự án theo cấu trúc như sau:
+        </p>
+        
+        <pre class="folder-tree">
+├── <span class="tree-highlight">AGENTS.md</span>                  <span class="tree-comment"># "Hiến pháp" định hình luật chơi và Tech Stack cho AI Agent</span>
+├── <span class="tree-highlight">CHANGELOG.md</span>               <span class="tree-comment"># Lịch sử ghi nhận tính năng theo tiêu chuẩn Keep a Changelog</span>
+└── <span class="tree-highlight">docs/</span>                      <span class="tree-comment"># Thư mục chứa tài liệu đặc tả</span>
+    ├── <span class="tree-highlight">brief.md</span>               <span class="tree-comment"># Ý tưởng tổng quát và phạm vi dự án (In-Scope/Out-of-Scope)</span>
+    ├── <span class="tree-highlight">BRD.md</span>                 <span class="tree-comment"># Tài liệu Yêu cầu Nghiệp vụ (Business Requirements Document)</span>
+    └── <span class="tree-highlight">plans/</span>                 <span class="tree-comment"># Thư mục chứa kế hoạch phát triển</span>
+        ├── <span class="tree-highlight-orange">master-plan.md</span>     <span class="tree-comment"># Bản đồ lộ trình dài hạn chia theo từng Phase</span>
+        ├── <span class="tree-comment">phase-1.md</span>         <span class="tree-comment"># Kế hoạch chi tiết của Phase 1 (Checklist, Expected Output, Test Guide)</span>
+        └── <span class="tree-comment">phase-2.md</span>         <span class="tree-comment"># Kế hoạch chi tiết của Phase 2...</span></pre>
+        
+        <div class="alert-box info">
+          <div class="alert-title"><i class="fa-solid fa-circle-exclamation"></i> VAI TRÒ CỦA AGENTS.MD</div>
+          <div class="alert-content">
+            File <code>AGENTS.md</code> là điểm neo tư duy của AI. Agent khi bắt đầu phiên làm việc sẽ tự động đọc file này để hiểu nhiệm vụ, cách chia phase, và tuân thủ tuyệt đối các ràng buộc công nghệ (Tech Stack) do bạn đặt ra.
+          </div>
+        </div>
+      </section>
+      
+      <!-- Section 3: Hướng dẫn cài đặt -->
+      <section id="installation" class="section-card">
+        <div class="section-icon"><i class="fa-solid fa-cube"></i></div>
+        <h3>3. Hướng dẫn cài đặt Solo Builder Kit</h3>
+        <p>
+          Để chuyển giao và kích hoạt quy trình Solo Builder cho bất kỳ dự án mới nào, bạn chỉ cần thực hiện các bước sau:
+        </p>
+        
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <h4><i class="fa-solid fa-copy"></i> Sao chép Kit</h4>
+            <p>Sao chép thư mục <code>solo-builder-kit/</code> hoặc giải nén file <code>solo-builder-kit.zip</code> vào thư mục gốc của dự án mới của bạn.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <h4><i class="fa-solid fa-terminal"></i> Chạy Setup</h4>
+            <p>Mở terminal tại thư mục gốc của dự án mới và chạy lệnh setup tự động:</p>
+            <div class="cli-box" style="margin: 0.5rem 0 0 0; padding: 0.75rem;">
+              <span class="cli-text">node solo-builder-kit/setup.cjs</span>
+              <button class="btn-copy" onclick="copyCli()"><i class="fa-solid fa-copy"></i> Copy</button>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <h4><i class="fa-solid fa-keyboard"></i> Nhập Thông Tin</h4>
+            <p>Nhập tên dự án và danh sách Tech Stack của bạn tại cửa sổ CLI tương tác. Bộ kit sẽ tự tạo các cấu trúc thư mục và cấu hình file rules tự động.</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Section 4: Vòng đời phát triển -->
+      <section id="lifecycle" class="section-card">
+        <div class="section-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+        <h3>4. Vòng đời phát triển một Phase (Quy trình PDCA)</h3>
+        <p>
+          Solo Builder chia quá trình phát triển thành các vòng lặp Phase nghiêm ngặt. Mỗi Phase bắt buộc phải tuân theo chu trình khép kín sau:
+        </p>
+        
+        <div class="diagram-container">
+          <div class="mermaid">
+            graph TD
+              A("Khởi đầu Phase (Đọc BRD/Master)") --> B("1. Lập Plan Chi Tiết (docs/plans/phase-n.md)")
+              B --> C("2. Review & Phê duyệt (User gõ Duyệt)")
+              C --> D("3. Thực thi Code kỷ luật (Checklist)")
+              D --> E("4. Báo cáo & Nghiệm thu (Test Steps)")
+              E --> F("5. Đóng gói (Cập nhật Changelog & Commit)")
+              F --> G("Kết thúc Phase (Master Plan [x])")
+              G --> H("Bắt đầu Phase tiếp theo")
+              style A fill:#030712,stroke:#3B82F6,stroke-width:2px;
+              style G fill:#030712,stroke:#10B981,stroke-width:2px;
+              style B fill:#1F2937,stroke:#374151;
+              style C fill:#1F2937,stroke:#374151;
+              style D fill:#1F2937,stroke:#374151;
+              style E fill:#1F2937,stroke:#374151;
+              style F fill:#1F2937,stroke:#374151;
+          </div>
+        </div>
+        
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Giai đoạn</th>
+              <th>Hành động cụ thể</th>
+              <th>Sản phẩm đầu ra (Artifacts)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Lập Kế Hoạch</strong></td>
+              <td>Phân tích Master Plan và viết checklist chi tiết các công việc cần làm, xác định chính xác các file sẽ bị tác động.</td>
+              <td>Tạo file <code>docs/plans/phase-n.md</code></td>
+            </tr>
+            <tr>
+              <td><strong>2. Phê Duyệt</strong></td>
+              <td>Trình bày tóm tắt kế hoạch cho người dùng duyệt trước khi tiến hành viết code.</td>
+              <td>Xác nhận phê duyệt trong khung chat chat</td>
+            </tr>
+            <tr>
+              <td><strong>3. Thực Thi</strong></td>
+              <td>Viết code tuần tự theo từng đầu mục checklist, áp dụng đúng cấu trúc thiết kế.</td>
+              <td>Các file mã nguồn dự án</td>
+            </tr>
+            <tr>
+              <td><strong>4. Nghiệm Thu</strong></td>
+              <td>Cung cấp báo cáo thực thi (Walkthrough) kèm theo tài liệu hướng dẫn manual test từng bước.</td>
+              <td>Tính năng chạy được không lỗi build</td>
+            </tr>
+            <tr>
+              <td><strong>5. Đóng Gói</strong></td>
+              <td>Đưa các cập nhật mới vào Changelog, đánh dấu hoàn thành phase trong Master Plan và commit code sạch.</td>
+              <td>Cập nhật <code>CHANGELOG.md</code> và tạo Git Commit</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <!-- Section 5: Kỷ luật quản lý -->
+      <section id="discipline" class="section-card">
+        <div class="section-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <h3>5. Kỷ luật quản lý trạng thái dự án</h3>
+        <p>
+          Để duy trì sự thống nhất và tránh tình trạng AI Agent bị "mất phương hướng" khi dự án phình to, toàn bộ thành viên dự án và AI Agent bắt buộc phải tuân theo 3 kỷ luật thép:
+        </p>
+        
+        <div class="alert-box info" style="border-left-color: var(--accent-cyan);">
+          <div class="alert-title" style="color: var(--accent-cyan);"><i class="fa-solid fa-shield-halved"></i> 1. NGUYÊN TẮC SINGLE SOURCE OF TRUTH (NGUỒN SỰ THẬT DUY NHẤT)</div>
+          <div class="alert-content">
+            Mọi tính năng, luồng nghiệp vụ và logic tính toán phải được đặc tả trong file <code>BRD.md</code>. Tuyệt đối không bàn luận nghiệp vụ rải rác bên ngoài rồi code chắp vá. Nếu nghiệp vụ thay đổi, hãy sửa đổi tài liệu <code>BRD.md</code> trước, sau đó mới tiến hành code.
+          </div>
+        </div>
+        
+        <div class="alert-box warning">
+          <div class="alert-title"><i class="fa-solid fa-ban"></i> 2. TUYỆT ĐỐI KHÔNG NHẢY PHASE (PHASE ISOLATION)</div>
+          <div class="alert-content">
+            Chỉ tập trung giải quyết và code các task của Phase hiện tại. Không bao giờ được phép code lấn sang các tính năng của phase sau khi phase hiện tại chưa được nghiệm thu và đánh dấu hoàn thành <code>[x]</code>. Quy tắc này giữ cho mã nguồn luôn ổn định và phạm vi kiểm soát tốt.
+          </div>
+        </div>
+        
+        <div class="alert-box tip">
+          <div class="alert-title"><i class="fa-solid fa-code-commit"></i> 3. KỶ LUẬT STATE SYNC (ĐỒNG BỘ TRẠNG THÁI)</div>
+          <div class="alert-content">
+            Mỗi khi kết thúc một nhiệm vụ lớn hoặc sửa một bug quan trọng, bắt buộc phải cập nhật file <code>CHANGELOG.md</code> ngay lập tức. Sau đó tiến hành <code>git add</code>, <code>git commit</code> rõ ràng và <code>git push</code> lên repository để đảm bảo an toàn mã nguồn.
+          </div>
+        </div>
+      </section>
+      
+      <!-- Section 6: Các câu lệnh AI mẫu -->
+      <section id="prompts" class="section-card">
+        <div class="section-icon"><i class="fa-solid fa-terminal"></i></div>
+        <h3>6. Mẫu câu lệnh tương tác dành cho AI Agent</h3>
+        <p>
+          Khi giao tiếp với các AI Agent tích hợp trong môi trường Solo Builder, bạn có thể sử dụng các mẫu prompt sau để kích hoạt nhanh các hành vi kỷ luật:
+        </p>
+        
+        <div class="alert-box info" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 1.5rem;">
+          <div class="alert-title" style="color: var(--text-bright);"><i class="fa-solid fa-play"></i> KHỞI TẠO DỰ ÁN MỚI</div>
+          <div class="alert-content">
+            <code style="color: var(--accent-cyan);">"Hãy đọc hiến pháp AGENTS.md và tài liệu brief.md, sau đó thiết lập kế hoạch Master Plan tổng thể cho dự án mới này."</code>
+          </div>
+        </div>
+        
+        <div class="alert-box info" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 1.5rem;">
+          <div class="alert-title" style="color: var(--text-bright);"><i class="fa-solid fa-forward-step"></i> BẮT ĐẦU MỘT PHASE MỚI</div>
+          <div class="alert-content">
+            <code style="color: var(--accent-cyan);">"Chúng ta chuẩn bị bước sang Phase 2. Hãy tự khởi tạo file kế hoạch docs/plans/phase-2.md chi tiết theo chuẩn Solo Builder và trình bày plan rút gọn để tôi duyệt."</code>
+          </div>
+        </div>
+        
+        <div class="alert-box info" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+          <div class="alert-title" style="color: var(--text-bright);"><i class="fa-solid fa-box-archive"></i> ĐÓNG GÓI NGHIỆM THU PHASE</div>
+          <div class="alert-content">
+            <code style="color: var(--accent-cyan);">"Tôi đã chạy các bước nghiệm thu thử nghiệm và mọi thứ hoạt động chính xác. Hãy tiến hành đóng gói Phase, cập nhật CHANGELOG.md, cập nhật master-plan.md thành [x] và đề xuất lệnh commit Git giúp tôi."</code>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+    
+  </div>
+
+  <script>
+    // Copy to clipboard function
+    function copyCli() {
+      navigator.clipboard.writeText("node solo-builder-kit/setup.cjs");
+      const btn = document.querySelector('.btn-copy');
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.style.background = 'var(--accent-green)';
+      btn.style.color = '#FFFFFF';
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy';
+        btn.style.background = 'rgba(255, 255, 255, 0.05)';
+        btn.style.color = 'var(--text-muted)';
+      }, 2000);
+    }
+    
+    // Smooth scrolling link active state
+    const sections = document.querySelectorAll('.section-card');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= (sectionTop - 120)) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        const link = item.querySelector('a').getAttribute('href').substring(1);
+        if (link === current) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

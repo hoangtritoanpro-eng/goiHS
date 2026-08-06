@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Cổng Trường - Gọi Học Sinh</title>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --primary-gradient: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+            --success-color: #34C759;
+            --success-gradient: linear-gradient(135deg, #34C759 0%, #28a745 100%);
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --bg-color: #F4F5F7;
+            --text-color: #111827;
+            --card-bg: #FFFFFF;
+            --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 20px rgba(0, 122, 255, 0.15);
+            --shadow-lg: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--text-color);
+        }
+        #micBtn {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 24px;
+            font-weight: 800;
+            border: none;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            outline: none;
+            position: relative;
+            z-index: 10;
+        }
+        #micBtn::before {
+            content: '';
+            position: absolute;
+            top: -15px; left: -15px; right: -15px; bottom: -15px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            opacity: 0.15;
+            z-index: -1;
+            transition: all 0.3s;
+        }
+        #micBtn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 122, 255, 0.4);
+        }
+        #micBtn:hover::before {
+            top: -20px; left: -20px; right: -20px; bottom: -20px;
+            opacity: 0.2;
+        }
+        #micBtn:active {
+            transform: scale(0.95) translateY(0);
+        }
+        #micBtn.listening {
+            background: linear-gradient(135deg, #FF3B30 0%, #c91b12 100%);
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 10px 30px rgba(255, 59, 48, 0.5);
+        }
+        #micBtn.listening::before {
+            background: #FF3B30;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 59, 48, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+        }
+        #status {
+            margin-top: 30px;
+            font-size: 16px;
+            color: #6B7280;
+            text-align: center;
+            min-height: 24px;
+            font-weight: 500;
+        }
+        #searchContainer {
+            margin-top: 30px; 
+            width: 100%; 
+            max-width: 480px; 
+            text-align: center;
+        }
+        .search-box {
+            position: relative; 
+            width: 100%;
+        }
+        .search-icon {
+            position: absolute; 
+            left: 20px; 
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #9CA3AF;
+        }
+        #senderSearch {
+            width: 100%; 
+            padding: 18px 20px 18px 55px; 
+            border: 2px solid transparent; 
+            border-radius: 20px; 
+            font-size: 16px; 
+            outline: none; 
+            box-sizing: border-box; 
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            font-family: inherit;
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+        #senderSearch:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+        #results {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 80px;
+        }
+        .student-btn {
+            background-color: var(--card-bg);
+            border: 2px solid transparent;
+            color: var(--text-color);
+            padding: 22px 25px;
+            font-size: 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .student-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(0,122,255,0.3);
+        }
+        .student-btn:active {
+            background: var(--primary-gradient);
+            color: white;
+            transform: scale(0.98);
+        }
+        .student-btn span strong {
+            color: var(--primary-color);
+        }
+        .student-btn:active span strong {
+            color: white;
+        }
+        .student-btn small {
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0.6;
+            background: rgba(0,0,0,0.05);
+            padding: 4px 10px;
+            border-radius: 10px;
+        }
+        .student-btn:active small {
+            background: rgba(255,255,255,0.2);
+            opacity: 1;
+        }
+        #notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success-color);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(52, 199, 89, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+        #notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        .queue-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--success-color);
+        }
+        .recall-btn-sender {
+            background-color: #FF9500;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .recall-btn-sender:active {
+            background-color: #E08300;
+        }
+
+        /* Dark mode overrides */
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #E5E5EA;
+        }
+        body.dark-mode input,
+        body.dark-mode .student-btn,
+        body.dark-mode .queue-item {
+            background-color: #1E1E1E;
+            color: #E5E5EA;
+            border-color: #333;
+        }
+        body.dark-mode .student-btn small {
+            color: #AAA;
+        }
+
+        .student-card {
+            background-color: var(--card-bg);
+            border-left: 10px solid var(--success-color);
+            padding: 25px 30px;
+            border-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), flash 2s 3;
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        body.dark-mode .student-card {
+            background-color: var(--card-bg);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-50px) scale(0.95); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        @keyframes flash {
+            0% { box-shadow: var(--shadow-sm); }
+            50% { background-color: #FFFDE7; box-shadow: 0 0 40px rgba(255, 214, 10, 0.6); }
+            100% { box-shadow: var(--shadow-sm); }
+        }
+        body.dark-mode @keyframes flash {
+            50% { background-color: #332B00; }
+        }
+
+        .timeout-alert {
+            border-left-color: var(--danger-color) !important;
+            animation: alertFlash 1s infinite !important;
+        }
+        .timeout-alert::after {
+            content: "QUÁ GIỜ!";
+            color: white;
+            background-color: var(--danger-color);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            position: absolute;
+            top: -15px;
+            left: 25px;
+            box-shadow: 0 4px 8px rgba(255, 59, 48, 0.3);
+        }
+        @keyframes alertFlash {
+            50% { box-shadow: 0 0 30px rgba(255, 59, 48, 0.6); }
+        }
+
+        .student-name {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--text-color);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        body.dark-mode .student-name {
+            color: #FFFFFF;
+        }
+
+        .done-btn {
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(52, 199, 89, 0.3);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .done-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(52, 199, 89, 0.4);
+        }
+        .done-btn:active { transform: scale(0.95); }
+        
+        .recall-btn {
+            background: linear-gradient(135deg, #FF9500 0%, #FF8000 100%);
+            color: white;
+            border: none;
+            padding: 18px 25px;
+            font-size: 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .recall-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(255, 149, 0, 0.4);
+        }
+        .recall-btn:active { transform: scale(0.95); }
+
+        /* Dark mode overrides */
+        body.dark-mode {
+            --bg-color: #0F1115;
+            --text-color: #F9FAFB;
+            --card-bg: #1F232B;
+        }
+        body.dark-mode #senderSearch {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: #374151;
+        }
+
+        .actions-wrap {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+    <button id="themeToggle" onclick="toggleTheme()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; cursor: pointer;">🌙</button>
+
+    <h1>CỔNG TRƯỜNG</h1>
+    
+    <button id="micBtn">BẤM ĐỂ<br>ĐỌC TÊN</button>
+    <div id="status">Sẵn sàng</div>
+    
+    <div id="searchContainer" style="margin-top: 20px; width: 100%; max-width: 450px; text-align: center;">
+        <div class="search-box" style="position: relative; width: 100%;">
+            <span class="search-icon" style="position: absolute; left: 15px; top: 15px; font-size: 18px;">🔍</span>
+            <input type="text" id="senderSearch" placeholder="Hoặc gõ tên để tìm thủ công..." style="width: 100%; padding: 15px 15px 15px 45px; border: 2px solid #E5E5EA; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box; text-align: left;" onkeyup="handleManualSearch()">
+        </div>
+        
+        <div style="text-align: center; margin-top: 15px;">
+            <button id="toggleAudioBtn" onclick="toggleLocalAudio()" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                🔇 Đã Tắt Âm Thanh Tại Đây
+            </button>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">(Mặc định tắt trên điện thoại/máy điều khiển để tránh bị vang tiếng với tivi)</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 15px;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 16px; font-weight: bold; color: #555;">
+                <input type="checkbox" id="ignoreWaitTimeCheckbox" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleIgnoreWaitTime(this.checked)">
+                Bỏ qua thời gian chờ (Gọi ngay)
+            </label>
+        </div>
+    </div>
+
+    <div id="results"></div>
+    
+    <div id="queueSection" style="margin-top: 40px; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; padding-bottom: 100px;">
+        <h2 style="color: #888; text-transform: uppercase; font-size: 20px; margin-bottom: 20px;">Học sinh đang gọi (Vuốt để xoá)</h2>
+        <div id="emptyState" style="margin-top: 20px; font-size: 20px; color: #555; display: none;">Chưa có học sinh nào.</div>
+        <div id="calledList" style="width: 100%; display: flex; flex-direction: column; gap: 20px;"></div>
+    </div>
+
+    <div id="notification">Đã gọi thành công!</div>
+
+    <!-- Nhúng cấu hình Firebase -->
+    <script src="firebase-config.js"></script>
+    <script>
+        // Dark mode logic
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeToggle').innerText = isDark ? '☀️' : '🌙';
+        }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeToggle').innerText = '☀️';
+        }
+
+        let isStarted = false;
+        
+        let ignoreWaitTime = false;
+        database.ref('settings/ignoreWaitTime').on('value', snap => {
+            ignoreWaitTime = !!snap.val();
+            const checkbox = document.getElementById('ignoreWaitTimeCheckbox');
+            if (checkbox) checkbox.checked = ignoreWaitTime;
+        });
+
+        window.toggleIgnoreWaitTime = function(isChecked) {
+            database.ref('settings').update({ ignoreWaitTime: isChecked });
+        }
+
+        // Lấy quyền Audio từ click đầu tiên trên body
+        document.body.addEventListener('click', () => {
+            if(!isStarted) {
+                isStarted = true;
+                // Phát âm thanh siêu ngắn để lấy quyền AudioContext từ trình duyệt
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                osc.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.001);
+            }
+        }, {once: true});
+
+        function playChime(callback) {
+            if (!isStarted) { if(callback) callback(); return; }
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                osc.connect(gainNode); gainNode.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0, ctx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                osc.start(); osc.stop(ctx.currentTime + 0.8);
+                setTimeout(() => { if (callback) callback(); }, 900);
+            } catch (e) {
+                console.error("Audio API error:", e);
+                if (callback) callback();
+            }
+        }
+
+        const audioQueue = [];
+        let isPlaying = false;
+
+        async function prefetchBlobAndPlay(text) {
+            const response = await fetch(`http://localhost:5000/tts?text=${encodeURIComponent(text)}`);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            
+            return {
+                play: (onEnd, onError) => {
+                    const audio = new Audio(url);
+                    audio.onended = onEnd;
+                    audio.onerror = onError;
+                    audio.play().catch(onError);
+                }
+            };
+        }
+
+        async function playNextInQueue() {
+            if (audioQueue.length === 0) {
+                isPlaying = false;
+                return;
+            }
+            isPlaying = true;
+            const item = audioQueue.shift();
+            
+            // Chạy song song: phát tiếng Ting Ting và Tải toàn bộ âm thanh
+            const chimePromise = new Promise(resolve => playChime(resolve));
+            
+            let streamPlayer;
+            try {
+                // Đợi tải xong 100% âm thanh để không bao giờ bị vấp (stutter)
+                streamPlayer = await item.streamPromise;
+            } catch (e) {
+                console.error("Loi tai am thanh:", e);
+                playNextInQueue();
+                return;
+            }
+            
+            // Đợi tiếng Ting Ting kêu xong
+            await chimePromise;
+            
+            // Phát âm thanh mượt mà liên tục
+            streamPlayer.play(
+                () => playNextInQueue(), 
+                (e) => {
+                    console.error("Loi play:", e);
+                    playNextInQueue();
+                }
+            );
+        }
+
+        let enableLocalAudio = false; // Mặc định TẮT âm thanh trên trang quản lý để tránh vang 2 lần với trang Trình chiếu
+
+        function toggleLocalAudio() {
+            enableLocalAudio = !enableLocalAudio;
+            const btn = document.getElementById('toggleAudioBtn');
+            if(enableLocalAudio) {
+                btn.innerHTML = '🔊 Đang Bật Âm Thanh Tại Đây';
+                btn.style.backgroundColor = '#28a745';
+            } else {
+                btn.innerHTML = '🔇 Đã Tắt Âm Thanh Tại Đây';
+                btn.style.backgroundColor = '#6c757d';
+            }
+        }
+
+        function speak(text) {
+            if(!isStarted || !enableLocalAudio) return;
+            
+            // Khởi tạo tải âm thanh (Blob) NGAY LẬP TỨC
+            const streamPromise = prefetchBlobAndPlay(text);
+            
+            audioQueue.push({ text, streamPromise });
+            if (!isPlaying) {
+                playNextInQueue();
+            }
+        }
+
+        // Lấy danh sách học sinh từ Firebase
+        const studentsRef = database.ref('students');
+        let displayedStudents = new Map();
+        let pendingSpeakIds = new Set();
+        let studentsList = {};
+        const calledList = document.getElementById('calledList');
+        const emptyState = document.getElementById('emptyState');
+
+        function canSpeakNow(className) {
+            if (ignoreWaitTime) return true;
+            if (!className || className === 'Chưa rõ') return true;
+            const match = className.match(/^(\d+)/);
+            if (!match) return true;
+            const grade = parseInt(match[1]);
+            const now = new Date();
+            const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+            if (grade >= 1 && grade <= 5) return currentTimeMinutes >= 980; // 16:20
+            else if (grade >= 6 && grade <= 9) return currentTimeMinutes >= 1000; // 16:40
+            return true;
+        }
+
+        function updateWaitStatusUI(id, isWaiting, className) {
+            const card = document.getElementById(`student-${id}`);
+            if (!card) return;
+            let label = card.querySelector('.wait-label');
+            if (isWaiting) {
+                if (!label) {
+                    label = document.createElement('div');
+                    label.className = 'wait-label';
+                    label.style.position = 'absolute';
+                    label.style.top = '-15px';
+                    label.style.right = '20px';
+                    label.style.backgroundColor = '#007AFF';
+                    label.style.color = 'white';
+                    label.style.padding = '6px 12px';
+                    label.style.borderRadius = '10px';
+                    label.style.fontSize = '14px';
+                    label.style.fontWeight = '700';
+                    label.style.boxShadow = '0 4px 8px rgba(0, 122, 255, 0.3)';
+                    card.appendChild(label);
+                }
+                const match = className ? className.match(/^(\d+)/) : null;
+                let timeStr = '16:20';
+                if (match && parseInt(match[1]) >= 6) timeStr = '16:40';
+                label.innerText = `ĐANG CHỜ ĐẾN ${timeStr}`;
+                card.style.opacity = '0.7';
+            } else {
+                if (label) label.remove();
+                card.style.opacity = '1';
+            }
+        }
+
+        studentsRef.on('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                studentsList = {};
+                calledList.innerHTML = '';
+                displayedStudents.clear();
+                updateEmptyState();
+                return;
+            }
+            
+            studentsList = snapshot.val();
+            
+            let studentsArray = [];
+            snapshot.forEach(child => { studentsArray.push({ id: child.key, ...child.val() }); });
+            let calledStudents = studentsArray.filter(s => s.status === 'called');
+            calledStudents.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+            const currentDisplayed = new Map(displayedStudents);
+            displayedStudents.clear();
+            calledList.innerHTML = '';
+
+            calledStudents.forEach(data => {
+                displayedStudents.set(data.id, data);
+                addStudentToUI(data.id, data.name, data.className, data.timestamp);
+
+                const oldData = currentDisplayed.get(data.id);
+                if (isStarted) {
+                    let shouldSpeak = false;
+                    if (!oldData) shouldSpeak = true;
+                    else if (data.lastRecall && data.lastRecall !== oldData.lastRecall) shouldSpeak = true;
+
+                    if (shouldSpeak) {
+                        pendingSpeakIds.add(data.id);
+                    }
+                }
+            });
+            updateEmptyState();
+        });
+
+        function addStudentToUI(id, name, className, timestamp) {
+            const card = document.createElement('div');
+            card.className = 'student-card';
+            card.id = `student-${id}`;
+            card.style.position = 'relative';
+            card.style.transition = 'transform 0.3s, opacity 0.3s';
+            
+            let classDisplay = className && className !== 'Chưa rõ' ? ` - ${className}` : '';
+            
+            card.innerHTML = `
+                <h2 class="student-name" style="cursor: pointer; user-select: none;" onclick="triggerRecall('${id}')" title="Nhấn để nhắc lại âm thanh">
+                    ${name}<span style="font-size: 32px; color: #888;">${classDisplay}</span>
+                </h2>
+                <div class="actions-wrap">
+                    <button class="recall-btn" onclick="triggerRecall('${id}')">🔊</button>
+                    <button class="done-btn" onclick="markAsCompleted('${id}')">ĐÃ VỀ</button>
+                </div>
+            `;
+            
+            let startX = 0; let isSwiping = false;
+            card.addEventListener('pointerdown', e => {
+                if(e.target.tagName === 'BUTTON') return;
+                startX = e.clientX; isSwiping = true;
+                card.setPointerCapture(e.pointerId);
+            });
+            card.addEventListener('pointerup', e => {
+                if (!isSwiping) return;
+                isSwiping = false;
+                card.releasePointerCapture(e.pointerId);
+                let swipeDistance = e.clientX - startX;
+                if (Math.abs(swipeDistance) > 100) {
+                    card.style.transform = swipeDistance > 0 ? 'translateX(100%)' : 'translateX(-100%)';
+                    card.style.opacity = '0';
+                    setTimeout(() => { window.markAsCompleted(id); }, 300);
+                }
+            });
+            calledList.appendChild(card);
+        }
+
+        setInterval(() => {
+            if (!isStarted || pendingSpeakIds.size === 0) return;
+            let sortedStudents = Array.from(displayedStudents.values())
+                .filter(s => pendingSpeakIds.has(s.id))
+                .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                
+            sortedStudents.forEach(data => {
+                if (canSpeakNow(data.className)) {
+                    pendingSpeakIds.delete(data.id);
+                    updateWaitStatusUI(data.id, false);
+                    let classClean = '';
+                    if (data.className && data.className !== 'Chưa rõ') {
+                        let match = data.className.match(/^(\d+)[\/\-_](\d+)/);
+                        if (match) {
+                            const numMapGrade = {'1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
+                            const numMapClass = {'1':'một','2':'hai','3':'ba','4':'tư','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
+                            classClean = ` ${numMapGrade[match[1]] || match[1]} ${numMapClass[match[2]] || match[2]}`;
+                        } else {
+                            const numMap = {'1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
+                            let parts = data.className.replace(/[\/\-_]/g, ' ').trim().split(' ');
+                            classClean = ' ' + parts.map(p => numMap[p] || p).join(' ');
+                        }
+                    }
+                    speak(`Mời ${data.name}${classClean}.`);
+                } else {
+                    updateWaitStatusUI(data.id, true, data.className);
+                }
+            });
+        }, 1000);
+
+        setInterval(() => {
+            const now = Date.now();
+            displayedStudents.forEach((data, id) => {
+                if (now - data.timestamp > 300000) {
+                    const card = document.getElementById(`student-${id}`);
+                    if (card && !card.classList.contains('timeout-alert')) {
+                        card.classList.add('timeout-alert');
+                    }
+                }
+            });
+        }, 10000);
+
+        let previousStudentCount = -1;
+        function updateEmptyState() {
+            const currentCount = displayedStudents.size;
+            if (currentCount === 0) {
+                emptyState.style.display = 'block';
+                if (previousStudentCount > 0) {
+                    confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: ['#FFD60A', '#34C759', '#007AFF', '#FF3B30'] });
+                }
+            } else {
+                emptyState.style.display = 'none';
+            }
+            previousStudentCount = currentCount;
+        }
+
+        window.markAsCompleted = function(id) {
+            studentsRef.child(id).update({ status: 'completed' });
+        }
+        
+        window.triggerRecall = function(id) {
+            studentsRef.child(id).update({ lastRecall: Date.now() });
+        }
+
+        // Setup Speech Recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Chrome, Safari hoặc Edge trên thiết bị di động.");
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'vi-VN';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        const micBtn = document.getElementById('micBtn');
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        const notification = document.getElementById('notification');
+
+        let isListening = false;
+
+        micBtn.addEventListener('click', () => {
+            if (isListening) {
+                recognition.stop();
+                return;
+            }
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error("Speech recognition error:", e);
+            }
+        });
+
+        // Hỗ trợ nút bấm trên micro ngoài (thường giả lập phím Space, Enter, hoặc phím Media/Volume)
+        document.addEventListener('keydown', (event) => {
+            // Không kích hoạt nếu đang gõ trong ô input
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            const triggerKeys = ['Space', 'Enter', 'MediaPlayPause', 'AudioVolumeUp', 'VolumeUp', 'AudioVolumeDown', 'VolumeDown', 'MediaTrackNext'];
+            if (triggerKeys.includes(event.code) || triggerKeys.includes(event.key)) {
+                event.preventDefault(); 
+                micBtn.click();
+            }
+        });
+
+        recognition.onstart = () => {
+            isListening = true;
+            micBtn.classList.add('listening');
+            micBtn.innerHTML = "ĐANG NGHE...";
+            statusDiv.textContent = "Hãy đọc tên học sinh...";
+            resultsDiv.innerHTML = "";
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase().trim();
+            statusDiv.textContent = `Nhận diện: "${transcript}"`;
+            
+            // Tìm kiếm bằng giọng nói sẽ tự động chọn nếu có duy nhất 1 kết quả
+            findStudent(transcript, true);
+        };
+
+        recognition.onerror = (event) => {
+            statusDiv.textContent = "Lỗi nhận diện: " + event.error;
+            resetMicBtn();
+        };
+
+        recognition.onend = () => {
+            resetMicBtn();
+        };
+
+        function resetMicBtn() {
+            isListening = false;
+            micBtn.classList.remove('listening');
+            micBtn.innerHTML = "BẤM ĐỂ<br>ĐỌC TÊN";
+        }
+
+        function removeDiacritics(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
+        }
+
+        function findStudent(query, autoCall = false) {
+            resultsDiv.innerHTML = "";
+            const queryNoMark = removeDiacritics(query);
+            
+            // Tìm số lớp (ví dụ: "8/4", "84", "102") có trong query để lọc nghiêm ngặt
+            let queryClass = null;
+            let targetWords = [];
+            const classMatch = queryNoMark.match(/\b(\d{1,2}\/\d{1,2}|\d{2,4})\b/);
+            if (classMatch) {
+                queryClass = classMatch[1].replace(/\//g, ''); // "8/4" -> "84"
+                
+                const beforeClassStr = queryNoMark.substring(0, classMatch.index).trim();
+                targetWords = beforeClassStr.split(/\s+/).filter(w => w.length > 0);
+            } else {
+                targetWords = queryNoMark.split(/\s+/).filter(w => w.length > 0);
+            }
+
+            // Chuyển object sang array để dễ xử lý, gộp Tên và Lớp vào searchString
+            let studentsArray = Object.keys(studentsList).map(key => {
+                const s = studentsList[key];
+                const nameNoMark = removeDiacritics(s.name.toLowerCase());
+                
+                const classNoMark = s.className ? removeDiacritics(s.className.toLowerCase()) : '';
+                const pureClass = classNoMark.split('_')[0]; // "8/4_cs5" -> "8/4"
+                const classNoSlash = pureClass ? pureClass.replace(/\//g, '') : ''; // "8/4" -> "84"
+                
+                return {
+                    id: key,
+                    name: s.name,
+                    status: s.status,
+                    className: s.className,
+                    nameNoMark: nameNoMark,
+                    pureClassNoSlash: classNoSlash,
+                    searchString: `${nameNoMark} ${classNoMark} ${classNoSlash} lop ${classNoMark} ${classNoSlash}`
+                };
+            });
+
+            // Lọc nghiêm ngặt: Nếu query chứa thông tin lớp, chỉ giữ lại học sinh thuộc lớp đó
+            if (queryClass) {
+                const filtered = studentsArray.filter(s => s.pureClassNoSlash === queryClass);
+                if (filtered.length > 0) {
+                    studentsArray = filtered;
+                }
+            }
+
+            // Loại bỏ các từ vô nghĩa khỏi targetWords để so khớp chính xác tên
+            const stopWords = ['gọi', 'tìm', 'em', 'học', 'sinh', 'bạn', 'cháu', 'con'];
+            const cleanTargetWords = targetWords.filter(w => !stopWords.includes(w));
+            const cleanQuery = cleanTargetWords.join(" ");
+
+            // 1. Chấm điểm từng học sinh để xếp hạng độ chính xác
+            let scoredStudents = studentsArray.map(student => {
+                let score = 0;
+
+                // TIÊU CHÍ 1: Tên học sinh chứa CHÍNH XÁC chuỗi các từ đã đọc (Các từ đứng liên tiếp nhau)
+                // Ví dụ: đọc "Hồng Anh", cleanQuery = "hong anh". Tên "Nguyễn Thị Hồng Anh" chứa "hong anh" -> Khớp tuyệt đối!
+                if (cleanQuery.length > 0 && student.nameNoMark.includes(cleanQuery)) {
+                    score += cleanTargetWords.length * 300; // Khớp chuỗi liên tiếp được điểm cực cao (300đ/từ)
+                }
+                
+                // TIÊU CHÍ 2: So khớp từ liên tiếp từ dưới lên (Suffix matching) để vớt các trường hợp nhận diện thiếu chữ đầu
+                if (cleanTargetWords.length > 0) {
+                    const sWords = student.nameNoMark.split(/\s+/);
+                    let matchLength = 0;
+                    while (matchLength < cleanTargetWords.length && matchLength < sWords.length) {
+                        if (cleanTargetWords[cleanTargetWords.length - 1 - matchLength] === sWords[sWords.length - 1 - matchLength]) {
+                            matchLength++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // NGĂN CHẶN NHẬN DIỆN SAI (Ví dụ đọc "Hồng Anh" máy nghe thành "Hồng An", rồi khớp nhầm "Thiên An" do chung 1 từ "An")
+                    // Điều kiện: Toàn bộ từ đọc vào phải khớp với đuôi tên học sinh, HOẶC khớp ít nhất 2 từ liên tiếp.
+                    if (matchLength === cleanTargetWords.length) {
+                        score += matchLength * 200; // Khớp tuyệt đối câu đọc
+                    } else if (matchLength >= 2) {
+                        score += matchLength * 100; // Khớp 1 phần đuôi nhưng đủ dài (>=2 từ)
+                    }
+                }
+                
+                // Điểm tuyệt đối: Tên học sinh nguyên vẹn nằm trong câu nói
+                if (queryNoMark.includes(student.nameNoMark)) {
+                    score += 100;
+                } 
+                // Hoặc tên học sinh chứa trọn vẹn câu nói (khi gõ tìm kiếm thủ công)
+                else if (student.searchString.includes(queryNoMark)) {
+                    score += 50;
+                }
+
+                // Điểm thành phần: Đếm số từ của query xuất hiện trong target (Không quan tâm thứ tự)
+                const qWords = queryNoMark.split(/\s+/).filter(w => w.length > 0);
+                if (qWords.length > 0) {
+                    let wordMatches = 0;
+                    for (const w of qWords) {
+                        if (student.searchString.includes(w)) wordMatches++;
+                    }
+                    const ratio = wordMatches / qWords.length;
+                    score += ratio * 10; // Tối đa 10 điểm
+                }
+
+                return { ...student, score: score };
+            });
+
+            // Lọc ra những học sinh có điểm >= 7.5 (tương đương khớp từ >= 75%)
+            scoredStudents = scoredStudents.filter(s => s.score >= 7.5);
+
+            // Sắp xếp điểm giảm dần
+            scoredStudents.sort((a, b) => b.score - a.score);
+
+            let exactMatches = [];
+            if (scoredStudents.length > 0) {
+                const highestScore = scoredStudents[0].score;
+                // TỐI ƯU: Chỉ lấy những học sinh có điểm bằng điểm cao nhất (Và >= 100)
+                if (highestScore >= 100) {
+                    exactMatches = scoredStudents.filter(s => s.score === highestScore);
+                } else {
+                    exactMatches = scoredStudents;
+                }
+            }
+
+            // 2. Kết hợp kết quả và TỐI ƯU TỐC ĐỘ (Fast Filtering)
+            let matches = [...exactMatches];
+            let isFuzzy = false;
+            
+            // CHỈ chạy Fuzzy Search (rất nặng) khi hệ thống KHÔNG TÌM THẤY Exact Match nào
+            if (matches.length === 0) {
+                isFuzzy = true;
+                const fuseOptions = {
+                    includeScore: true,
+                    threshold: 0.4, 
+                    ignoreLocation: true,
+                    keys: ['searchString']
+                };
+                const fuse = new Fuse(studentsArray, fuseOptions);
+                const fuseResults = fuse.search(queryNoMark).map(r => r.item);
+
+                for (const item of fuseResults) {
+                    if (!matches.find(m => m.id === item.id)) {
+                        matches.push(item);
+                    }
+                }
+            }
+
+            if (matches.length === 0) {
+                statusDiv.innerHTML = `Không tìm thấy học sinh nào khớp với: "<b>${query}</b>"`;
+                return;
+            }
+
+            // TỰ ĐỘNG CHỌN NẾU CÓ ĐÚNG 1 KẾT QUẢ VÀ ĐANG TÌM BẰNG GIỌNG NÓI
+            if (matches.length === 1 && autoCall) {
+                document.getElementById('senderSearch').value = '';
+                callStudent(matches[0].id, matches[0].name);
+                return;
+            }
+
+            // Hiển thị kết quả chi tiết để phụ huynh/GV biết AI nghe được chữ gì
+            if (isFuzzy) {
+                statusDiv.innerHTML = `Gợi ý gần giống cho "<b>${query}</b>" <br><small style="color:red">(Do AI nghe chưa chuẩn hoặc không khớp chính xác)</small>`;
+            } else {
+                statusDiv.innerHTML = `Đã tìm thấy <b>${matches.length}</b> kết quả cho: "<b>${query}</b>"`;
+            }
+            matches.forEach(student => {
+                const btn = document.createElement('button');
+                btn.className = 'student-btn';
+                
+                let statusText = '';
+                if(student.status === 'called') statusText = 'Đang đợi ở cổng';
+                else if (student.status === 'completed') statusText = 'Đã về';
+                else statusText = 'Đang trong lớp';
+
+                let classDisplay = student.className && student.className !== 'Chưa rõ' ? ` - Lớp ${student.className}` : '';
+                btn.innerHTML = `<span>${student.name} <strong style="color: #FF3B30;">${classDisplay}</strong></span> <small>(${statusText})</small>`;
+                
+                btn.onclick = () => {
+                    document.getElementById('senderSearch').value = '';
+                    callStudent(student.id, student.name);
+                };
+                resultsDiv.appendChild(btn);
+            });
+        }
+
+        window.handleManualSearch = function() {
+            const query = document.getElementById('senderSearch').value.trim().toLowerCase();
+            if (query.length > 0) {
+                findStudent(query);
+            } else {
+                resultsDiv.innerHTML = "";
+                statusDiv.textContent = "Sẵn sàng";
+            }
+        }
+
+        function callStudent(id, name) {
+            studentsRef.child(id).update({
+                status: 'called',
+                timestamp: Date.now(),
+                lastRecall: Date.now()
+            }).then(() => {
+                // Hiển thị thông báo
+                notification.textContent = `Đã gọi thành công: ${name}`;
+                notification.classList.add('show');
+                resultsDiv.innerHTML = "";
+                statusDiv.textContent = "Sẵn sàng";
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }).catch(err => {
+                alert("Lỗi cập nhật Firebase: " + err.message);
+            });
+        }
+
+        // Đã gỡ bỏ hàm recallStudent cũ, thay bằng triggerRecall.
+    </script>
+</body>
+</html>

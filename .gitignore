@@ -1,0 +1,7 @@
+VieNeu-TTS/
+temp_output.wav
+__pycache__/
+*.pyc
+.env
+node_modules/
+.DS_Store

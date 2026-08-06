@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Đang xóa dữ liệu...</title>
+</head>
+<body>
+    <h2>Đang dọn dẹp hệ thống...</h2>
+    <script>
+        // Xóa sạch toàn bộ localStorage (bao gồm userEmail)
+        localStorage.clear();
+        
+        // Thêm tham số chống cache cực mạnh
+        window.location.href = 'login.html?clear=' + Date.now();
+    </script>
+</body>
+</html>

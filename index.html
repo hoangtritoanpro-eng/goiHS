@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <title>Hệ Thống Gọi Học Sinh (GoiHS)</title>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --bg-color: #F2F2F7;
+            --text-color: #1C1C1E;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #FFF;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            color: var(--primary-color);
+        }
+        p {
+            color: #8E8E93;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .nav-card {
+            display: block;
+            background-color: #F9F9F9;
+            border: 2px solid #E5E5EA;
+            border-radius: 16px;
+            padding: 25px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.2s;
+            text-align: left;
+            position: relative;
+        }
+        .nav-card:hover {
+            border-color: var(--primary-color);
+            background-color: #F0F8FF;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,122,255,0.1);
+        }
+        .nav-card h2 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+        }
+        .nav-card span {
+            color: #8E8E93;
+            font-size: 14px;
+        }
+        .nav-card.admin { border-left: 6px solid #FF9500; }
+        .nav-card.sender { border-left: 6px solid #007AFF; }
+        .nav-card.receiver { border-left: 6px solid #34C759; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Hệ Thống Gọi Học Sinh</h1>
+        <p>Chọn giao diện làm việc của bạn</p>
+
+        <div class="nav-grid">
+            <a href="admin.html" class="nav-card admin">
+                <h2>Quản Trị (Ban Giám Hiệu)</h2>
+                <span>Thêm/Xóa học sinh, thống kê, xem lịch sử</span>
+            </a>
+            
+            <a href="sender.html" class="nav-card sender">
+                <h2>Điều khiển Trung tâm (Giám thị)</h2>
+                <span>Dùng micro hoặc gõ tên để gọi học sinh, quản lý hàng đợi, tự động phát loa</span>
+            </a>
+            
+            <a href="parent.html" class="nav-card" style="border-left: 6px solid #FF2D55;">
+                <h2>Cổng Phụ Huynh (Parent Portal)</h2>
+                <span>Đăng nhập để gọi đón con bằng giọng nói hoặc gõ tên</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

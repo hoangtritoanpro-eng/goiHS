@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <title>Quản Trị - Danh Sách Học Sinh</title>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --danger-color: #FF3B30;
+            --success-color: #34C759;
+            --bg-color: #F2F2F7;
+            --text-color: #1C1C1E;
+            --card-bg: #FFFFFF;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #E5E5EA;
+            padding-bottom: 20px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #F9F9F9;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #E5E5EA;
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #8E8E93;
+            text-transform: uppercase;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0;
+        }
+        h1 { margin: 0; font-size: 24px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-logout { background-color: #8E8E93; }
+        .btn-export { background-color: #34C759; }
+        .btn-import { background-color: #007AFF; }
+        .btn-reset-all { background-color: #FF9500; }
+        .btn-add { background-color: var(--primary-color); }
+        .btn-delete { background-color: var(--danger-color); padding: 6px 12px; font-size: 12px; }
+        .btn-reset { background-color: var(--success-color); padding: 6px 12px; font-size: 12px; }
+        .btn-delete-all { background-color: var(--danger-color); }
+
+        .add-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .add-form input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #D1D1D6;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+        .add-form input:focus { border-color: var(--primary-color); }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #D1D1D6;
+            background-color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1C1C1E;
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        th { background-color: #F9F9F9; font-weight: 600; color: #8E8E93; text-transform: uppercase; font-size: 12px; }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-waiting { background-color: #E5E5EA; color: #1C1C1E; }
+        .status-called { background-color: #FFF500; color: #1C1C1E; }
+        .status-completed { background-color: #E3F8E9; color: var(--success-color); }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Dark mode overrides */
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #E5E5EA;
+            --card-bg: #1E1E1E;
+        }
+        body.dark-mode .container {
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        body.dark-mode .header {
+            border-bottom-color: #333;
+        }
+        body.dark-mode .stat-card {
+            background-color: #2C2C2E;
+            border-color: #333;
+        }
+        body.dark-mode input, body.dark-mode .filter-btn {
+            background-color: #2C2C2E;
+            color: #E5E5EA;
+            border-color: #444;
+        }
+        body.dark-mode th {
+            background-color: #2C2C2E;
+            color: #AAA;
+            border-bottom-color: #333;
+        }
+        body.dark-mode td {
+            border-bottom-color: #333;
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- SheetJS cho Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Config -->
+    <script src="firebase-config.js"></script>
+</head>
+<body style="display: none;" id="bodyMain">
+
+    <div class="container">
+        <div class="header">
+            <h1>Quản Lý Danh Sách Học Sinh</h1>
+            <div class="header-actions">
+                <button id="themeToggle" onclick="toggleTheme()" style="background: none; border: none; font-size: 24px; cursor: pointer; margin-right: 10px;">🌙</button>
+                <button class="btn btn-delete-all" onclick="deleteAll()">Xóa Tất Cả</button>
+                <button class="btn btn-reset-all" onclick="resetAll()">Reset Ngày Mới</button>
+                <button class="btn btn-import" onclick="document.getElementById('importExcel').click()">Nhập Excel</button>
+                <input type="file" id="importExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleImport(event)">
+                <button class="btn btn-export" onclick="exportCSV()">Xuất CSV</button>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <h3>Tổng số</h3>
+                <p class="value" id="statTotal">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Trong lớp</h3>
+                <p class="value" id="statWaiting">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Đang gọi</h3>
+                <p class="value" id="statCalled">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Đã về</h3>
+                <p class="value" id="statCompleted">0</p>
+            </div>
+        </div>
+
+        <form class="add-form" id="addForm">
+            <input type="text" id="studentName" placeholder="Nhập tên học sinh mới (Ví dụ: Nguyễn Văn A)" required>
+            <input type="text" id="studentClass" placeholder="Lớp (Vd: 1A)" style="flex: 0.3;">
+            <input type="email" id="parentEmail" placeholder="Email Phụ huynh (Tuỳ chọn)" style="flex: 0.5;">
+            <button type="submit" class="btn btn-add">Thêm Mới</button>
+        </form>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="setFilter('all', this)">Tất cả</button>
+            <button class="filter-btn" onclick="setFilter('waiting', this)">Đang trong lớp</button>
+            <button class="filter-btn" onclick="setFilter('called', this)">Đang chờ ở cổng</button>
+            <button class="filter-btn" onclick="setFilter('completed', this)">Lịch sử (Đã về)</button>
+        </div>
+
+        <div class="search-bar" style="margin-bottom: 20px;">
+            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm tên học sinh..." style="width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box;" onkeyup="renderTable()">
+        </div>
+
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Mã (ID)</th>
+                    <th>Họ và Tên</th>
+                    <th>Lớp</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian gọi</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="studentList">
+                <!-- Dữ liệu render tại đây -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Dark mode logic
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeToggle').innerText = isDark ? '☀️' : '🌙';
+        }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeToggle').innerText = '☀️';
+        }
+
+        const studentsRef = database.ref('students');
+        let currentFilter = 'all';
+        let allStudentsData = null;
+
+        // Bỏ qua Auth, hiển thị luôn dữ liệu
+        document.getElementById('bodyMain').style.display = 'block';
+        loadData();
+
+        // Load Data
+        function loadData() {
+            studentsRef.on('value', snapshot => {
+                if (snapshot.exists()) {
+                    allStudentsData = snapshot.val();
+                } else {
+                    allStudentsData = null;
+                }
+                renderTable();
+            });
+        }
+
+        async function createFirebaseUser(email) {
+            if (!email || !email.includes('@')) return;
+            const password = "skyline123";
+            const apiKey = firebaseConfig.apiKey;
+            const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password, returnSecureToken: false })
+                });
+                const data = await response.json();
+                if (data.error && data.error.message !== 'EMAIL_EXISTS') {
+                    console.error("Lỗi tạo user:", data.error.message);
+                }
+            } catch (e) {
+                console.error("Lỗi network khi tạo user:", e);
+            }
+        }
+
+        // Add Student
+        document.getElementById('addForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('studentName');
+            const classInput = document.getElementById('studentClass');
+            const emailInput = document.getElementById('parentEmail');
+            
+            const name = input.value.trim();
+            const className = classInput.value.trim() || 'Chưa rõ';
+            const parentEmail = emailInput.value.trim().toLowerCase();
+            
+            if (name) {
+                // Tạo ID ngẫu nhiên hoặc dựa trên timestamp
+                const id = 'hs_' + Date.now();
+                
+                let data = {
+                    name: name,
+                    className: className,
+                    status: 'waiting'
+                };
+                if (parentEmail) {
+                    data.parentEmail = parentEmail;
+                    createFirebaseUser(parentEmail); // Tự động tạo account Auth
+                }
+                
+                studentsRef.child(id).set(data).then(() => {
+                    input.value = '';
+                    classInput.value = '';
+                    emailInput.value = '';
+                }).catch(err => alert("Lỗi: " + err.message));
+            }
+        });
+
+        // Format Date
+        function formatTime(ts) {
+            if (!ts) return '-';
+            const d = new Date(ts);
+            return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + d.toLocaleDateString('vi-VN');
+        }
+
+        // Filter Logic
+        window.setFilter = function(filterValue, btnElement) {
+            currentFilter = filterValue;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            renderTable();
+        }
+
+        function updateDashboard() {
+            let total = 0, waiting = 0, called = 0, completed = 0;
+            if (allStudentsData) {
+                for (const id in allStudentsData) {
+                    total++;
+                    const st = allStudentsData[id].status;
+                    if (st === 'waiting') waiting++;
+                    else if (st === 'called') called++;
+                    else if (st === 'completed') completed++;
+                }
+            }
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statWaiting').innerText = waiting;
+            document.getElementById('statCalled').innerText = called;
+            document.getElementById('statCompleted').innerText = completed;
+        }
+
+        function renderTable() {
+            updateDashboard();
+            const tbody = document.getElementById('studentList');
+            const searchInput = document.getElementById('searchInput');
+            const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            tbody.innerHTML = '';
+            
+            if (allStudentsData) {
+                let hasData = false;
+                for (const id in allStudentsData) {
+                    const student = allStudentsData[id];
+                    
+                    if (currentFilter !== 'all' && student.status !== currentFilter) {
+                        continue;
+                    }
+
+                    if (searchQuery && !student.name.toLowerCase().includes(searchQuery)) {
+                        continue;
+                    }
+                    
+                    hasData = true;
+                    const tr = document.createElement('tr');
+                    
+                    let badgeClass = '';
+                    let statusText = '';
+                    if (student.status === 'waiting') { badgeClass = 'status-waiting'; statusText = 'Đang trong lớp'; }
+                    else if (student.status === 'called') { badgeClass = 'status-called'; statusText = 'Đang gọi...'; }
+                    else if (student.status === 'completed') { badgeClass = 'status-completed'; statusText = 'Đã về'; }
+
+                    tr.innerHTML = `
+                        <td><small style="color: #8E8E93">${id}</small></td>
+                        <td style="font-weight: 500">${student.name}</td>
+                        <td><span style="color: var(--primary-color); font-weight: bold;">${student.className || 'Chưa rõ'}</span></td>
+                        <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
+                        <td style="font-size: 13px; color: #666;">${formatTime(student.timestamp)}</td>
+                        <td class="actions">
+                            <button class="btn btn-reset" onclick="resetStatus('${id}')">Reset về Lớp</button>
+                            <button class="btn btn-delete" onclick="deleteStudent('${id}')">Xóa</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+                
+                if (!hasData) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;">Không có dữ liệu phù hợp.</td></tr>';
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;">Chưa có học sinh nào.</td></tr>';
+            }
+        }
+
+        // Load Data
+        function loadData() {
+            studentsRef.on('value', snapshot => {
+                if (snapshot.exists()) {
+                    allStudentsData = snapshot.val();
+                } else {
+                    allStudentsData = null;
+                }
+                renderTable();
+            });
+        }
+
+        window.resetStatus = function(id) {
+            studentsRef.child(id).update({ status: 'waiting' });
+        }
+
+        window.resetAll = function() {
+            if (confirm('Bạn có chắc muốn Reset TOÀN BỘ học sinh về trạng thái "Đang trong lớp" không? Hành động này dùng để chuẩn bị cho một ngày làm việc mới.')) {
+                if (allStudentsData) {
+                    const updates = {};
+                    for (const id in allStudentsData) {
+                        updates[id + '/status'] = 'waiting';
+                    }
+                    studentsRef.update(updates)
+                        .then(() => alert("Đã reset tất cả học sinh về lớp thành công!"))
+                        .catch(err => alert("Lỗi: " + err.message));
+                }
+            }
+        }
+
+        window.deleteAll = function() {
+            if (confirm('CẢNH BÁO ĐỎ: Bạn có chắc chắn muốn XÓA SẠCH TOÀN BỘ danh sách học sinh hiện tại không? Hành động này không thể hoàn tác!')) {
+                if (confirm('Xác nhận lại một lần nữa: Xóa tất cả học sinh?')) {
+                    studentsRef.remove()
+                        .then(() => alert("Đã dọn dẹp sạch sẽ toàn bộ danh sách học sinh!"))
+                        .catch(err => alert("Lỗi: " + err.message));
+                }
+            }
+        }
+
+        window.deleteStudent = function(id) {
+            if (confirm('Bạn có chắc muốn xóa học sinh này khỏi danh sách?')) {
+                studentsRef.child(id).remove();
+            }
+        }
+
+        window.exportCSV = function() {
+            if (!allStudentsData) {
+                alert("Không có dữ liệu để xuất.");
+                return;
+            }
+            let csvContent = "\uFEFF"; // Thêm BOM để Excel đọc đúng UTF-8
+            csvContent += "Mã (ID),Họ và Tên,Lớp,Trạng thái,Thời gian gọi\n";
+            for (const id in allStudentsData) {
+                const s = allStudentsData[id];
+                let statusText = s.status === 'waiting' ? 'Đang trong lớp' : (s.status === 'called' ? 'Đang gọi' : 'Đã về');
+                let className = s.className || 'Chưa rõ';
+                csvContent += `"${id}","${s.name}","${className}","${statusText}","${formatTime(s.timestamp)}"\n`;
+            }
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            const dateStr = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+            link.setAttribute("download", `BaoCao_HocSinh_${dateStr}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.handleImport = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""}); 
+                    
+                    let count = 0;
+                    const updates = {};
+                    const now = Date.now();
+                    
+                    // 1. Tự động tìm tên Lớp chung (Quét 20 dòng đầu)
+                    let className = "Chưa rõ";
+                    for (let i = 0; i < Math.min(json.length, 20); i++) {
+                        const row = json[i];
+                        for(let j=0; j<row.length; j++) {
+                            const cellStr = String(row[j]).trim();
+                            if (cellStr.toLowerCase().startsWith('lớp:')) {
+                                const parts = cellStr.split('-');
+                                className = parts[0].replace(/lớp:/i, '').replace(/[_-\s]*CS5/ig, '').trim();
+                                break;
+                            }
+                        }
+                        if (className !== "Chưa rõ") break;
+                    }
+
+                    // 2. Tìm hàng tiêu đề (chứa chữ "Họ và tên")
+                    let headerRowIndex = -1;
+                    let nameColIndex = -1;
+                    let classColIndex = -1;
+                    let emailColIndex = -1;
+                    
+                    for (let i = 0; i < Math.min(json.length, 20); i++) {
+                        const row = json[i];
+                        for(let j=0; j<row.length; j++) {
+                            const cellStr = String(row[j]).trim().toLowerCase();
+                            if (cellStr === 'họ và tên' || cellStr === 'họ tên' || cellStr === 'tên học sinh') {
+                                headerRowIndex = i;
+                                nameColIndex = j;
+                            }
+                            if (cellStr === 'lớp' || cellStr === 'class') {
+                                classColIndex = j;
+                            }
+                            if (cellStr.includes('email') || cellStr.includes('phụ huynh') || cellStr === 'email phụ huynh') {
+                                emailColIndex = j;
+                            }
+                        }
+                        if (headerRowIndex !== -1) break;
+                    }
+
+                    // 3. Đọc dữ liệu
+                    // Fallback: Nếu không có tiêu đề, mặc định Cột 0 là Tên, Cột 1 là Lớp (Bỏ qua dòng 0)
+                    let startIndex = headerRowIndex !== -1 ? headerRowIndex + 1 : 1;
+                    let nameIdx = nameColIndex !== -1 ? nameColIndex : 0;
+                    let classIdx = classColIndex !== -1 ? classColIndex : 1;
+                    
+                    for (let i = startIndex; i < json.length; i++) {
+                        const row = json[i];
+                        if (row && row.length > nameIdx) {
+                            const name = String(row[nameIdx]).trim();
+                            
+                            // Lấy lớp theo hàng (nếu có cột Lớp), nếu không dùng lớp chung
+                            let finalClass = className;
+                            if (classColIndex !== -1 && row.length > classIdx) {
+                                const rClass = String(row[classIdx]).trim();
+                                if (rClass) finalClass = rClass;
+                            } else if (headerRowIndex === -1 && row.length > classIdx) {
+                                const rClass = String(row[classIdx]).trim();
+                                if (rClass) finalClass = rClass;
+                            }
+                            
+                            let pEmail = "";
+                            if (emailColIndex !== -1 && row.length > emailColIndex) {
+                                pEmail = String(row[emailColIndex]).trim().toLowerCase();
+                            }
+
+                            // Bỏ qua dòng rỗng hoặc dòng chứa tổng cộng
+                            if (name && name !== "" && !name.toLowerCase().includes('tổng số')) {
+                                const id = 'hs_' + now + '_' + i;
+                                let cleanClass = finalClass.replace(/[_-\s]*CS5/ig, '').trim();
+                                
+                                let studentData = { name: name, className: cleanClass, status: 'waiting' };
+                                if (pEmail && pEmail.includes('@')) {
+                                    studentData.parentEmail = pEmail;
+                                    createFirebaseUser(pEmail); // Tự động tạo account Auth
+                                }
+                                
+                                updates[id] = studentData;
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    if (count > 0) {
+                        studentsRef.update(updates).then(() => {
+                            alert(`Đã nạp thành công ${count} học sinh vào hệ thống!`);
+                        }).catch(err => {
+                            alert("Lỗi khi lưu vào Firebase: " + err.message);
+                        });
+                    } else {
+                        alert("Không tìm thấy dữ liệu hợp lệ trong file Excel.");
+                    }
+                } catch(error) {
+                    alert("Lỗi đọc file Excel: " + error.message);
+                }
+                
+                // Reset input
+                document.getElementById('importExcel').value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
+</body>
+</html>

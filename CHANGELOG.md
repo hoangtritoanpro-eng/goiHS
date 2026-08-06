@@ -1,0 +1,123 @@
+# Changelog - goiHS
+
+Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi chép lại trong file này.
+
+Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [1.10.0] - 2026-08-03
+
+### Added (Đã thêm)
+- **Âm thanh Ting Ting (Airport Chime)**: Bổ sung âm báo hiệu Ting Ting (bằng Web Audio API) phát lên trước khi AI đọc tên học sinh, giúp tạo sự chú ý tốt hơn.
+- **Hiệu ứng Pháo giấy (Confetti)**: Thêm hiệu ứng tung pháo giấy trên màn hình iPad khi tất cả học sinh đã về hết (Empty State), khích lệ tinh thần người dùng.
+- **Chế độ Ban đêm (Dark Mode)**: Thêm công tắc chuyển đổi Giao diện Sáng / Tối trên trang Cổng trường và trang Quản trị, giúp phụ huynh và giáo viên đỡ chói mắt khi dùng buổi tối. Hệ thống tự động ghi nhớ tùy chọn.
+
+---
+
+## [2.0.0] - 2026-08-03
+### Changed (Thay đổi lớn)
+- **Hợp nhất Hệ thống (Unified Mode)**: Gộp trang Lớp học và Cổng trường làm một. Thiết bị điều phối ở cổng giờ đây đảm nhận cả việc Gọi học sinh, Hiển thị danh sách lớn, và Tự động đọc loa AI.
+- Đổi cách đọc tên Lớp (vd 7/5 thành "bảy năm") để AI đọc không bị ngọng.
+
+## [1.9.0] - 2026-08-03
+
+### Added (Đã thêm)
+- **Hàng đợi ưu tiên (Queue)**: Danh sách học sinh trên trang Receiver giờ đây được sắp xếp theo đúng thứ tự (bé nào được gọi trước sẽ hiển thị phía trên).
+- **Nhắc lại âm thanh**: Phụ huynh (trên màn hình Sender) và Giáo viên (trên màn hình Receiver) có thể bấm nút "🔊 Nhắc lại" để kích hoạt iPad phát lại âm thanh thông báo.
+- **Vuốt để xóa (Swipe to Dismiss)**: Cải thiện trải nghiệm (UX) trên iPad, cho phép Giáo viên vuốt thẻ học sinh sang trái hoặc phải để xác nhận học sinh đã về.
+- **Theo dõi học sinh đang chờ**: Trang Sender (Cổng trường) giờ đây có thêm tính năng hiển thị danh sách các bé đang chờ ở cổng, giúp phụ huynh dễ dàng quan sát và thao tác nhắc loa.
+
+---
+
+## [1.8.0] - 2026-08-03
+
+### Added (Đã thêm)
+- **Quản lý theo Lớp học (Class Categorization)**: Hệ thống chính thức hỗ trợ phân loại học sinh theo lớp học (ví dụ: 1A, 2B) để giải quyết triệt để vấn đề gọi nhầm học sinh trùng tên.
+- **Nâng cấp Import Excel**: File mẫu Excel giờ đây sẽ tự động nhận diện Cột B làm tên Lớp Học (Cột A vẫn là Tên học sinh).
+- **Giọng đọc AI thông minh hơn**: Tại trang Lớp học (Receiver), AI sẽ tự động đọc cả tên lớp: "Mời bạn Nguyễn Văn A lớp 1A xuống cổng".
+
+---
+
+## [1.7.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Tính năng **Tìm kiếm thông minh**: Thêm thanh tìm kiếm theo tên học sinh (gõ tới đâu lọc kết quả tới đó) trên cả 2 giao diện: Quản trị (Admin) và Cổng trường (Sender).
+- Tính năng **Gọi thủ công (Backup cho Voice API)**: Tại trang Cổng trường, giám thị có thể gõ tên vào ô tìm kiếm và bấm gọi trực tiếp mà không cần dùng Micro. Đây là phương án dự phòng hoàn hảo khi cổng trường quá ồn ào.
+- **Firebase Deploy Config**: Khởi tạo file `.firebaserc` và `firebase.json`, sẵn sàng đưa dự án lên máy chủ Firebase Hosting bằng lệnh `firebase deploy`.
+
+---
+
+## [1.6.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Tính năng **Nhập từ Excel (Import)**: Thêm nút "Nhập Excel" trên trang Admin. Người dùng có thể upload file Excel (`.xlsx`, `.csv`) để đẩy hàng trăm học sinh lên hệ thống trong 1 cú click. Yêu cầu định dạng file đơn giản (chỉ lấy cột A là Họ và tên).
+- Tích hợp thư viện **SheetJS (xlsx)** thông qua CDN để đọc dữ liệu từ file Excel nguyên bản ngay trên trình duyệt mà không cần xử lý qua Server Backend.
+
+---
+
+## [1.5.0] - 2026-08-03
+
+### Changed (Đã thay đổi)
+- **Gỡ bỏ hệ thống Đăng nhập (Auth)**: Nhằm đơn giản hoá quá trình triển khai cho trường học nội bộ, yêu cầu đăng nhập bằng Firebase Auth trên trang Admin (`admin.html`) đã được gỡ bỏ hoàn toàn.
+- **Thêm Landing Page (`index.html`)**: Tạo 1 trang chủ duy nhất (1 đường link) làm Menu chính để người dùng chọn giao diện tương ứng (Quản Trị, Cổng Trường, Lớp Học) dễ dàng thay vì phải nhớ đường dẫn từng trang.
+
+---
+
+## [1.4.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Tính năng **Reset Ngày Mới**: Thêm nút Reset Tất Cả (màu cam) trên trang Admin, cho phép đưa tất cả dữ liệu học sinh (cả những em đang chờ hay đã về) quay lại trạng thái "Đang trong lớp" chỉ bằng 1 cú click.
+- Tính năng **Progressive Web App (PWA)**: Bổ sung file `manifest.json` và cấu hình meta tags cho toàn bộ các trang (`sender`, `receiver`, `admin`, `login`). Giao diện giờ đây tương thích tối đa với thiết bị di động, cho phép cài đặt (Add to Home Screen) thành một ứng dụng độc lập trên điện thoại/iPad.
+
+---
+*Ghi chú: Phase 5 hoàn thành, đánh dấu sự kết thúc của dự án GoiHS. Ứng dụng đã sẵn sàng 100% về mặt tính năng và trải nghiệm người dùng (UX).*
+
+## [1.3.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Tính năng **Dashboard Thống kê**: Trang Admin giờ đây hiển thị 4 chỉ số (Tổng số, Đang trong lớp, Đang gọi, Đã về) tự động cập nhật Realtime, giúp quản lý có cái nhìn tổng quan.
+- Tính năng **Xuất Dữ Liệu (Export CSV)**: Thêm nút "Xuất CSV" trên trang Admin. Toàn bộ danh sách học sinh và thời gian gọi sẽ được đóng gói thành file Excel-compatible (hỗ trợ tiếng Việt UTF-8) để báo cáo.
+
+---
+*Ghi chú: Phase 4 hoàn thành. Dự án cơ bản đã đầy đủ các chức năng vận hành, giám sát và báo cáo chuyên nghiệp.*
+
+## [1.2.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Tính năng **Lịch sử**: Thêm thanh lọc (Filter Toolbar) vào trang Admin (`admin.html`) để xem nhanh các học sinh "Đang trong lớp", "Đang chờ ở cổng" và "Đã về" (Lịch sử).
+- Hiển thị **Thời gian gọi** có định dạng giờ/phút/ngày trên bảng danh sách của trang Admin.
+- Tính năng **Cảnh báo quá giờ**: Thêm logic `setInterval` chạy ngầm trên `receiver.html`. Nếu học sinh chờ ở cổng quá 5 phút, thẻ tên sẽ nhấp nháy đỏ kèm nhãn "QUÁ GIỜ!".
+
+---
+*Ghi chú: Phase 3 hoàn thành. Ứng dụng đã giải quyết được trọn vẹn bài toán vận hành và quản lý trễ hẹn.*
+
+## [1.1.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Xây dựng trang Quản trị (`admin.html`) cho phép Thêm, Xóa, Reset trạng thái học sinh (CRUD).
+- Tích hợp **Firebase Authentication** để bảo mật ứng dụng.
+- Xây dựng trang Đăng nhập (`login.html`) yêu cầu tài khoản Email/Password để truy cập Admin.
+
+### Changed (Đã thay đổi)
+- Cập nhật `firebase-config.js` để tự động kiểm tra và khởi tạo database động, tránh lỗi undefined trên các trang không import database.
+
+---
+*Ghi chú: Phase 2 hoàn thành. Ứng dụng đã có thể hoạt động hoàn chỉnh với dữ liệu thật thay vì mock data.*
+
+## [1.0.0] - 2026-08-03
+
+### Added (Đã thêm)
+- Thiết lập thành công hệ thống **Solo Builder Starter Kit** cho dự án.
+- Tạo file cấu hình `firebase-config.js` kết nối với Realtime Database.
+- Xây dựng giao diện Giám thị (`sender.html`) với tính năng Nhận diện giọng nói (Speech-to-Text) và thuật toán tìm kiếm tên học sinh.
+- Xây dựng giao diện Giáo viên (`receiver.html`) với tính năng đọc tên học sinh (Text-to-Speech) và hiệu ứng Flash màn hình.
+- Thêm script `seed.js` để đẩy dữ liệu mẫu lên Firebase an toàn, không bị lỗi font Tiếng Việt.
+- Khởi tạo tài liệu dự án (`brief.md`, `BRD.md`, `master-plan.md`).
+
+### Changed (Đã thay đổi)
+- Đổi cấu hình Firebase sang Database thật của người dùng.
+
+### Fixed (Đã sửa)
+- Sửa lỗi font chữ Tiếng Việt khi đẩy mock data từ PowerShell bằng cách chuyển sang dùng Node script.
+
+---
+*Ghi chú: Phase 1 (MVP) đã hoàn thành và sẵn sàng nghiệm thu.*
