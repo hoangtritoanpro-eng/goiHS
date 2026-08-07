@@ -418,6 +418,13 @@
                 Bỏ qua thời gian chờ (Gọi ngay)
             </label>
         </div>
+
+        <div style="text-align: center; margin-top: 15px;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary-color);">
+                <input type="checkbox" id="useDeviceTTSCheckbox" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleDeviceTTS(this.checked)">
+                Dùng giọng đọc của thiết bị (Không cần chạy Python)
+            </label>
+        </div>
     </div>
 
     <div id="results"></div>
@@ -459,6 +466,17 @@
             const val = snap.val();
             if (val) currentTtsUrl = val;
         });
+
+        let useDeviceTTS = false;
+        database.ref('settings/useDeviceTTS').on('value', snap => {
+            useDeviceTTS = !!snap.val();
+            const checkbox = document.getElementById('useDeviceTTSCheckbox');
+            if (checkbox) checkbox.checked = useDeviceTTS;
+        });
+
+        window.toggleDeviceTTS = function(isChecked) {
+            database.ref('settings').update({ useDeviceTTS: isChecked });
+        }
 
         window.toggleIgnoreWaitTime = function(isChecked) {
             database.ref('settings').update({ ignoreWaitTime: isChecked });
@@ -514,6 +532,19 @@
         let isPlaying = false;
 
         async function prefetchBlobAndPlay(text) {
+            if (useDeviceTTS || !currentTtsUrl) {
+                return {
+                    play: (onEnd, onError) => {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'vi-VN';
+                        utterance.rate = 0.9;
+                        utterance.onend = onEnd;
+                        utterance.onerror = onError;
+                        window.speechSynthesis.speak(utterance);
+                    }
+                };
+            }
+
             try {
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
                 const response = await fetch(`${baseUrl}/tts?text=${encodeURIComponent(text)}`, {
@@ -805,14 +836,15 @@
 
         // Setup Speech Recognition
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
         if (!SpeechRecognition) {
             alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Chrome, Safari hoặc Edge trên thiết bị di động.");
+        } else {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'vi-VN';
+            recognition.continuous = true;
+            recognition.interimResults = true;
         }
-        
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'vi-VN';
-        recognition.continuous = false;
-        recognition.interimResults = false;
 
         const micBtn = document.getElementById('micBtn');
         const statusDiv = document.getElementById('status');
@@ -820,16 +852,25 @@
         const notification = document.getElementById('notification');
 
         let isListening = false;
+        let recognitionTimeout = null;
+        let lastTranscript = '';
 
         micBtn.addEventListener('click', () => {
+            if (!recognition) return;
+            
             if (isListening) {
-                recognition.stop();
+                try { recognition.stop(); } catch(e){}
+                resetMicBtn();
                 return;
             }
             try {
                 recognition.start();
             } catch (e) {
                 console.error("Speech recognition error:", e);
+                if (e.message && e.message.includes('already started')) {
+                    try { recognition.stop(); } catch(err){}
+                }
+                resetMicBtn();
             }
         });
 
@@ -847,35 +888,72 @@
             }
         });
 
-        recognition.onstart = () => {
-            isListening = true;
-            micBtn.classList.add('listening');
-            micBtn.innerHTML = "ĐANG NGHE...";
-            statusDiv.textContent = "Hãy đọc tên học sinh...";
-            resultsDiv.innerHTML = "";
-        };
+        if (recognition) {
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('listening');
+                micBtn.innerHTML = "ĐANG NGHE...";
+                statusDiv.textContent = "Hãy đọc tên học sinh...";
+                resultsDiv.innerHTML = "";
+                lastTranscript = '';
+                if (recognitionTimeout) clearTimeout(recognitionTimeout);
+            };
 
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase().trim();
-            statusDiv.textContent = `Nhận diện: "${transcript}"`;
-            
-            // Tìm kiếm bằng giọng nói sẽ tự động chọn nếu có duy nhất 1 kết quả
-            findStudent(transcript, true);
-        };
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
 
-        recognition.onerror = (event) => {
-            statusDiv.textContent = "Lỗi nhận diện: " + event.error;
-            resetMicBtn();
-        };
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
 
-        recognition.onend = () => {
-            resetMicBtn();
-        };
+                const transcript = (finalTranscript || interimTranscript).toLowerCase().trim();
+                
+                if (!transcript) return;
+                
+                statusDiv.textContent = `Nhận diện: "${transcript}"`;
+                lastTranscript = transcript;
+                
+                if (recognitionTimeout) clearTimeout(recognitionTimeout);
+
+                if (finalTranscript) {
+                    findStudent(transcript, true);
+                    try { recognition.stop(); } catch(e){}
+                } else {
+                    findStudent(transcript, false); // Hiển thị kết quả ngay khi đang đọc
+                    
+                    // Tự động chốt kết quả sau 1.2s im lặng (vượt qua độ trễ của trình duyệt)
+                    recognitionTimeout = setTimeout(() => {
+                        if (isListening && lastTranscript) {
+                            findStudent(lastTranscript, true); // Coi như final
+                            try { recognition.stop(); } catch(e){}
+                        }
+                    }, 1200);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Lỗi nhận diện giọng nói:", event.error);
+                if (event.error !== 'no-speech') {
+                    statusDiv.textContent = "Lỗi nhận diện: " + event.error;
+                }
+                resetMicBtn();
+            };
+
+            recognition.onend = () => {
+                resetMicBtn();
+            };
+        }
 
         function resetMicBtn() {
             isListening = false;
             micBtn.classList.remove('listening');
             micBtn.innerHTML = "BẤM ĐỂ<br>ĐỌC TÊN";
+            if (recognitionTimeout) clearTimeout(recognitionTimeout);
         }
 
         function removeDiacritics(str) {
@@ -1035,6 +1113,9 @@
             if (matches.length === 1 && autoCall) {
                 document.getElementById('senderSearch').value = '';
                 callStudent(matches[0].id, matches[0].name);
+                if (typeof isListening !== 'undefined' && isListening && typeof recognition !== 'undefined' && recognition) {
+                    try { recognition.stop(); } catch(e){}
+                }
                 return;
             }
 
