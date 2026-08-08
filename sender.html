@@ -507,10 +507,18 @@
             }
         }, {once: true});
 
+        let globalAudioCtx = null;
+
         function playChime(callback) {
-            if (!isStarted) { if(callback) callback(); return; }
+            if (!isStarted || !enableLocalAudio) { if(callback) callback(); return; }
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (!globalAudioCtx) {
+                    globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const ctx = globalAudioCtx;
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
                 const osc = ctx.createOscillator();
                 const gainNode = ctx.createGain();
                 osc.connect(gainNode); gainNode.connect(ctx.destination);
@@ -520,7 +528,8 @@
                 gainNode.gain.setValueAtTime(0, ctx.currentTime);
                 gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.02);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                osc.start(); osc.stop(ctx.currentTime + 0.3);
+                osc.start(ctx.currentTime); 
+                osc.stop(ctx.currentTime + 0.3);
                 setTimeout(() => { if (callback) callback(); }, 350);
             } catch (e) {
                 console.error("Audio API error:", e);
@@ -548,14 +557,20 @@
             }
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
                 const response = await fetch(`${baseUrl}/tts?text=${encodeURIComponent(text)}`, {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
                         "X-Pinggy-No-Screen": "true",
                         "Bypass-Tunnel-Reminder": "true"
-                    }
+                    },
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
+                
                 if (!response.ok) throw new Error("Network response was not ok");
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);

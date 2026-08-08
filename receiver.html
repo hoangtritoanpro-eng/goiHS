@@ -233,6 +233,7 @@
 
         let isStarted = false;
         let voices = [];
+        let globalAudioCtx = null;
 
         // Hàm phát chuông thông báo (Airport Chime)
         function playChime(callback) {
@@ -241,7 +242,14 @@
                 return;
             }
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (!globalAudioCtx) {
+                    globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const ctx = globalAudioCtx;
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+                
                 const osc = ctx.createOscillator();
                 const gainNode = ctx.createGain();
                 
@@ -256,7 +264,7 @@
                 gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.02);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
                 
-                osc.start();
+                osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.3);
                 
                 setTimeout(() => {
@@ -281,14 +289,20 @@
 
         async function prefetchBlobAndPlay(text) {
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
                 const response = await fetch(`${baseUrl}/tts?text=${encodeURIComponent(text)}`, {
                     headers: {
                         "ngrok-skip-browser-warning": "true",
                         "X-Pinggy-No-Screen": "true",
                         "Bypass-Tunnel-Reminder": "true"
-                    }
+                    },
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
+                
                 if (!response.ok) throw new Error("Network response was not ok");
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
