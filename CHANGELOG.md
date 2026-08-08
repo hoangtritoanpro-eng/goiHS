@@ -4,6 +4,15 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.13.0] - 2026-08-08
+
+### Changed (Đã tối ưu)
+- **Dò tìm thông minh (Smart Search)**: Cải tiến thuật toán trên trang Cổng trường (`sender.html`), tự động chuyển đổi các từ chỉ số (một, hai, ba, tư...) thành chữ số khi người dùng đọc tên lớp, giúp việc nhận diện chính xác tuyệt đối kể cả khi trình duyệt nhận diện sai định dạng.
+- **AutoCall Tức thì (Zero Latency)**: Hệ thống nay không còn chờ đợi 1.2s hay 800ms khi người dùng ngừng đọc. Nếu thuật toán khoanh vùng được 1 học sinh khớp 100% ngay giữa câu (interim), nó sẽ tự động chốt kết quả và gửi lệnh gọi lập tức.
+- **Loại bỏ độ trễ phát loa (Event-Driven)**: Viết lại luồng xử lý trên trang Lớp học (`receiver.html`). Loa sẽ phát ra tín hiệu ngay ở mili-giây đầu tiên khi có dữ liệu từ Firebase thay vì phải chờ bộ đếm `setInterval` quét như trước đây, tiết kiệm tối đa thời gian chờ đợi.
+
+---
+
 ## [1.12.0] - 2026-08-08
 
 ### Added (Đã thêm)

@@ -511,6 +511,7 @@
                 });
 
                 updateEmptyState();
+                processPendingSpeak();
             });
         }
 
@@ -568,8 +569,7 @@
             calledList.appendChild(card);
         }
 
-        // Timer xử lý hàng đợi phát loa (mỗi giây)
-        setInterval(() => {
+        function processPendingSpeak() {
             if (!isStarted || pendingSpeakIds.size === 0) return;
             
             let sortedStudents = Array.from(displayedStudents.values())
@@ -603,7 +603,10 @@
                     updateWaitStatusUI(data.id, true, data.className);
                 }
             });
-        }, 300);
+        }
+
+        // Timer xử lý hàng đợi phát loa (dành cho những học sinh đang chờ đến giờ)
+        setInterval(processPendingSpeak, 1000);
 
         // Logic cảnh báo quá 5 phút (300,000 ms)
         setInterval(() => {

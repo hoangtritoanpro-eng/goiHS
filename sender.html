@@ -729,6 +729,7 @@
                 }
             });
             updateEmptyState();
+            processPendingSpeak();
         });
 
         function addStudentToUI(id, name, className, timestamp) {
@@ -770,7 +771,7 @@
             calledList.appendChild(card);
         }
 
-        setInterval(() => {
+        function processPendingSpeak() {
             if (!isStarted || pendingSpeakIds.size === 0) return;
             let sortedStudents = Array.from(displayedStudents.values())
                 .filter(s => pendingSpeakIds.has(s.id))
@@ -786,7 +787,8 @@
                     updateWaitStatusUI(data.id, true, data.className);
                 }
             });
-        }, 300);
+        }
+        setInterval(processPendingSpeak, 1000);
 
         setInterval(() => {
             const now = Date.now();
@@ -914,13 +916,13 @@
                 } else {
                     findStudent(transcript, false); // Hiển thị kết quả ngay khi đang đọc
                     
-                    // Tự động chốt kết quả sau 1.2s im lặng (vượt qua độ trễ của trình duyệt)
+                    // Tự động chốt kết quả sau 800ms im lặng (vượt qua độ trễ của trình duyệt)
                     recognitionTimeout = setTimeout(() => {
                         if (isListening && lastTranscript) {
                             findStudent(lastTranscript, true); // Coi như final
                             try { recognition.stop(); } catch(e){}
                         }
-                    }, 1200);
+                    }, 800);
                 }
             };
 
@@ -953,13 +955,27 @@
             const queryNoMark = removeDiacritics(query);
             
             // Tìm số lớp (ví dụ: "8/4", "84", "102") có trong query để lọc nghiêm ngặt
+            // Chuyển đổi các từ chỉ số sau chữ "lớp" thành số (để xử lý giọng nói "lớp tám bốn")
+            let queryForClass = queryNoMark;
+            const lopIndex = queryForClass.indexOf('lop');
+            if (lopIndex !== -1) {
+                let classPart = queryForClass.substring(lopIndex);
+                classPart = classPart.replace(/\b(mot|hai|ba|bon|tu|nam|sau|bay|tam|chin)\b/g, match => {
+                    const map = {'mot':'1','hai':'2','ba':'3','bon':'4','tu':'4','nam':'5','sau':'6','bay':'7','tam':'8','chin':'9'};
+                    return map[match];
+                });
+                queryForClass = queryForClass.substring(0, lopIndex) + classPart;
+            }
+
             let queryClass = null;
             let targetWords = [];
-            const classMatch = queryNoMark.match(/\b(\d{1,2}[\/\s]\d{1,2}|\d{2,4})\b/);
+            const classMatch = queryForClass.match(/\b(\d{1,2}[\/\s]\d{1,2}|\d{2,4})\b/);
             if (classMatch) {
                 queryClass = classMatch[1].replace(/[\/\s]/g, ''); // "8/4" -> "84", "9 5" -> "95"
                 
-                const beforeClassStr = queryNoMark.substring(0, classMatch.index).trim();
+                // Lấy phần tên trước khi có thông tin lớp
+                const cutoffIndex = lopIndex !== -1 ? lopIndex : classMatch.index;
+                const beforeClassStr = queryNoMark.substring(0, cutoffIndex).trim();
                 targetWords = beforeClassStr.split(/\s+/).filter(w => w.length > 0);
             } else {
                 targetWords = queryNoMark.split(/\s+/).filter(w => w.length > 0);
@@ -1098,7 +1114,13 @@
             }
 
             // TỰ ĐỘNG CHỌN NẾU CÓ ĐÚNG 1 KẾT QUẢ VÀ ĐANG TÌM BẰNG GIỌNG NÓI
-            if (matches.length === 1 && autoCall) {
+            // Mở rộng thông minh: Gọi ngay lập tức nếu đang đọc dở (interim) mà đã khớp cực kỳ chính xác (score >= 100)
+            let shouldAutoCall = autoCall;
+            if (!shouldAutoCall && matches.length === 1 && exactMatches.length === 1 && matches[0].score >= 100) {
+                shouldAutoCall = true;
+            }
+
+            if (matches.length === 1 && shouldAutoCall) {
                 document.getElementById('senderSearch').value = '';
                 if (matches[0].status === 'completed') {
                     announceCompleted(matches[0]);
