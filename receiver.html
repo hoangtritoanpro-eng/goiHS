@@ -270,6 +270,8 @@
 
         const audioQueue = [];
         let isPlaying = false;
+        let lastSpokenText = "";
+        let lastSpokenTime = 0;
 
         let currentTtsUrl = 'http://127.0.0.1:5000';
         database.ref('settings/ttsUrl').on('value', snap => {
@@ -352,6 +354,13 @@
         function speak(text) {
             if(!isStarted) return;
             
+            const now = Date.now();
+            if (text === lastSpokenText && (now - lastSpokenTime < 4000)) {
+                return; // Chống đọc 2 lần liên tiếp cùng 1 câu
+            }
+            lastSpokenText = text;
+            lastSpokenTime = now;
+
             // Khởi tạo tải âm thanh (Blob) NGAY LẬP TỨC
             const streamPromise = prefetchBlobAndPlay(text);
             
