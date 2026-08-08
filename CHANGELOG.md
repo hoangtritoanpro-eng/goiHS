@@ -4,6 +4,17 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.12.0] - 2026-08-08
+
+### Added (Đã thêm)
+- **Tự động gọi Anh/Chị/Em (Siblings Auto-call)**: Hệ thống sử dụng chung một mã "SĐT Phụ huynh / Mã Gia Đình" để liên kết các học sinh là anh em. Khi gọi một học sinh ở cổng trường, hệ thống sẽ tự động quét và gọi luôn người anh/em đang học lớp khác xuống cùng một lúc, tiết kiệm rất nhiều thời gian cho giám thị. 
+- **Phát thanh học sinh Đã Về**: Bổ sung tính năng thông minh, nếu phụ huynh đến muộn không biết con đã về và tiếp tục đọc tên con, hệ thống sẽ nhận diện trạng thái "Đã về" và lập tức phát thanh thông báo "[Tên học sinh] [Lớp] đã về" thay vì đẩy học sinh vào danh sách chờ gọi như cũ.
+
+### Changed (Đã thay đổi)
+- **Cải tiến tính năng Nhập Excel (Admin)**: Đổi trường "Email Phụ huynh" thành "SĐT Phụ huynh / Mã Gia Đình". Hàm nhập Excel sẽ tự động nhận diện các cột chứa chữ "SĐT", "Điện thoại" để lấy làm mã liên kết anh em. Gỡ bỏ tính năng tạo user Firebase Auth không cần thiết để tối ưu hóa tốc độ nhập liệu.
+
+---
+
 ## [1.11.1] - 2026-08-08
 
 ### Fixed (Đã sửa)

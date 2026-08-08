@@ -780,19 +780,7 @@
                 if (canSpeakNow(data.className)) {
                     pendingSpeakIds.delete(data.id);
                     updateWaitStatusUI(data.id, false);
-                    let classClean = '';
-                    if (data.className && data.className !== 'Chưa rõ') {
-                        let match = data.className.match(/^(\d+)[\/\-_](\d+)/);
-                        if (match) {
-                            const numMapGrade = {'1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
-                            const numMapClass = {'1':'một','2':'hai','3':'ba','4':'tư','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
-                            classClean = ` ${numMapGrade[match[1]] || match[1]} ${numMapClass[match[2]] || match[2]}`;
-                        } else {
-                            const numMap = {'1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
-                            let parts = data.className.replace(/[\/\-_]/g, ' ').trim().split(' ');
-                            classClean = ' ' + parts.map(p => numMap[p] || p).join(' ');
-                        }
-                    }
+                    let classClean = getCleanClass(data.className);
                     speak(`${data.name}${classClean}.`);
                 } else {
                     updateWaitStatusUI(data.id, true, data.className);
@@ -1112,7 +1100,11 @@
             // TỰ ĐỘNG CHỌN NẾU CÓ ĐÚNG 1 KẾT QUẢ VÀ ĐANG TÌM BẰNG GIỌNG NÓI
             if (matches.length === 1 && autoCall) {
                 document.getElementById('senderSearch').value = '';
-                callStudent(matches[0].id, matches[0].name);
+                if (matches[0].status === 'completed') {
+                    announceCompleted(matches[0]);
+                } else {
+                    callStudent(matches[0]);
+                }
                 if (typeof isListening !== 'undefined' && isListening && typeof recognition !== 'undefined' && recognition) {
                     try { recognition.stop(); } catch(e){}
                 }
@@ -1139,7 +1131,11 @@
                 
                 btn.onclick = () => {
                     document.getElementById('senderSearch').value = '';
-                    callStudent(student.id, student.name);
+                    if (student.status === 'completed') {
+                        announceCompleted(student);
+                    } else {
+                        callStudent(student);
+                    }
                 };
                 resultsDiv.appendChild(btn);
             });
@@ -1155,14 +1151,64 @@
             }
         }
 
-        function callStudent(id, name) {
-            studentsRef.child(id).update({
-                status: 'called',
-                timestamp: Date.now(),
-                lastRecall: Date.now()
-            }).then(() => {
-                // Hiển thị thông báo
-                notification.textContent = `Đã gọi thành công: ${name}`;
+        function getCleanClass(className) {
+            let classClean = '';
+            if (className && className !== 'Chưa rõ') {
+                let match = className.match(/^(\d+)[\/\-_](\d+)/);
+                if (match) {
+                    const numMapGrade = {'1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
+                    const numMapClass = {'1':'một','2':'hai','3':'ba','4':'tư','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
+                    classClean = ` ${numMapGrade[match[1]] || match[1]} ${numMapClass[match[2]] || match[2]}`;
+                } else {
+                    const numMap = {'1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười','11':'mười một','12':'mười hai'};
+                    let parts = className.replace(/[\/\-_]/g, ' ').trim().split(' ');
+                    classClean = ' ' + parts.map(p => numMap[p] || p).join(' ');
+                }
+            }
+            return classClean;
+        }
+
+        function announceCompleted(student) {
+            let classClean = getCleanClass(student.className);
+            speak(`${student.name}${classClean} đã về.`);
+            
+            notification.textContent = `${student.name} đã về rồi!`;
+            notification.classList.add('show');
+            resultsDiv.innerHTML = "";
+            statusDiv.textContent = "Sẵn sàng";
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function callStudent(student) {
+            let updates = {};
+            const now = Date.now();
+            
+            updates[student.id + '/status'] = 'called';
+            updates[student.id + '/timestamp'] = now;
+            updates[student.id + '/lastRecall'] = now;
+            
+            let calledNames = [student.name];
+
+            // Auto-call siblings
+            const fullStudentData = studentsList[student.id];
+            if (fullStudentData && fullStudentData.parentContact && fullStudentData.parentContact.trim() !== '') {
+                const pContact = fullStudentData.parentContact.trim();
+                for (const sid in studentsList) {
+                    const s = studentsList[sid];
+                    if (sid !== student.id && s.parentContact === pContact && s.status !== 'completed') {
+                        updates[sid + '/status'] = 'called';
+                        updates[sid + '/timestamp'] = now;
+                        updates[sid + '/lastRecall'] = now;
+                        calledNames.push(s.name);
+                    }
+                }
+            }
+
+            studentsRef.update(updates).then(() => {
+                notification.textContent = `Đã gọi thành công: ${calledNames.join(', ')}`;
                 notification.classList.add('show');
                 resultsDiv.innerHTML = "";
                 statusDiv.textContent = "Sẵn sàng";

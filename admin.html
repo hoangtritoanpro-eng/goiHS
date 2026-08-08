@@ -228,7 +228,7 @@
         <form class="add-form" id="addForm">
             <input type="text" id="studentName" placeholder="Nhập tên học sinh mới (Ví dụ: Nguyễn Văn A)" required>
             <input type="text" id="studentClass" placeholder="Lớp (Vd: 1A)" style="flex: 0.3;">
-            <input type="email" id="parentEmail" placeholder="Email Phụ huynh (Tuỳ chọn)" style="flex: 0.5;">
+            <input type="text" id="parentContact" placeholder="SĐT Phụ huynh / Mã Gia đình (Tuỳ chọn)" style="flex: 0.5;">
             <button type="submit" class="btn btn-add">Thêm Mới</button>
         </form>
 
@@ -298,36 +298,18 @@
             });
         }
 
-        async function createFirebaseUser(email) {
-            if (!email || !email.includes('@')) return;
-            const password = "skyline123";
-            const apiKey = firebaseConfig.apiKey;
-            const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, password: password, returnSecureToken: false })
-                });
-                const data = await response.json();
-                if (data.error && data.error.message !== 'EMAIL_EXISTS') {
-                    console.error("Lỗi tạo user:", data.error.message);
-                }
-            } catch (e) {
-                console.error("Lỗi network khi tạo user:", e);
-            }
-        }
+
 
         // Add Student
         document.getElementById('addForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('studentName');
             const classInput = document.getElementById('studentClass');
-            const emailInput = document.getElementById('parentEmail');
+            const contactInput = document.getElementById('parentContact');
             
             const name = input.value.trim();
             const className = classInput.value.trim() || 'Chưa rõ';
-            const parentEmail = emailInput.value.trim().toLowerCase();
+            const parentContact = contactInput.value.trim().toLowerCase();
             
             if (name) {
                 // Tạo ID ngẫu nhiên hoặc dựa trên timestamp
@@ -338,15 +320,14 @@
                     className: className,
                     status: 'waiting'
                 };
-                if (parentEmail) {
-                    data.parentEmail = parentEmail;
-                    createFirebaseUser(parentEmail); // Tự động tạo account Auth
+                if (parentContact) {
+                    data.parentContact = parentContact;
                 }
                 
                 studentsRef.child(id).set(data).then(() => {
                     input.value = '';
                     classInput.value = '';
-                    emailInput.value = '';
+                    contactInput.value = '';
                 }).catch(err => alert("Lỗi: " + err.message));
             }
         });
@@ -541,7 +522,7 @@
                     let headerRowIndex = -1;
                     let nameColIndex = -1;
                     let classColIndex = -1;
-                    let emailColIndex = -1;
+                    let contactColIndex = -1;
                     
                     for (let i = 0; i < Math.min(json.length, 20); i++) {
                         const row = json[i];
@@ -554,8 +535,8 @@
                             if (cellStr === 'lớp' || cellStr === 'class') {
                                 classColIndex = j;
                             }
-                            if (cellStr.includes('email') || cellStr.includes('phụ huynh') || cellStr === 'email phụ huynh') {
-                                emailColIndex = j;
+                            if (cellStr.includes('sđt') || cellStr.includes('sdt') || cellStr.includes('điện thoại') || cellStr.includes('phone') || cellStr.includes('phụ huynh') || cellStr.includes('email')) {
+                                contactColIndex = j;
                             }
                         }
                         if (headerRowIndex !== -1) break;
@@ -582,9 +563,9 @@
                                 if (rClass) finalClass = rClass;
                             }
                             
-                            let pEmail = "";
-                            if (emailColIndex !== -1 && row.length > emailColIndex) {
-                                pEmail = String(row[emailColIndex]).trim().toLowerCase();
+                            let pContact = "";
+                            if (contactColIndex !== -1 && row.length > contactColIndex) {
+                                pContact = String(row[contactColIndex]).trim().toLowerCase();
                             }
 
                             // Bỏ qua dòng rỗng hoặc dòng chứa tổng cộng
@@ -593,9 +574,8 @@
                                 let cleanClass = finalClass.replace(/[_-\s]*CS5/ig, '').trim();
                                 
                                 let studentData = { name: name, className: cleanClass, status: 'waiting' };
-                                if (pEmail && pEmail.includes('@')) {
-                                    studentData.parentEmail = pEmail;
-                                    createFirebaseUser(pEmail); // Tự động tạo account Auth
+                                if (pContact) {
+                                    studentData.parentContact = pContact;
                                 }
                                 
                                 updates[id] = studentData;
