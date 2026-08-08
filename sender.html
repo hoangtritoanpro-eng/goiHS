@@ -1168,7 +1168,13 @@
             return classClean;
         }
 
+        const lastCallTimes = {};
+
         function announceCompleted(student) {
+            const now = Date.now();
+            if (lastCallTimes[student.id] && (now - lastCallTimes[student.id] < 3000)) return;
+            lastCallTimes[student.id] = now;
+
             let classClean = getCleanClass(student.className);
             speak(`${student.name}${classClean} đã về.`);
             
@@ -1183,8 +1189,11 @@
         }
 
         function callStudent(student) {
-            let updates = {};
             const now = Date.now();
+            if (lastCallTimes[student.id] && (now - lastCallTimes[student.id] < 3000)) return;
+            lastCallTimes[student.id] = now;
+
+            let updates = {};
             
             updates[student.id + '/status'] = 'called';
             updates[student.id + '/timestamp'] = now;
