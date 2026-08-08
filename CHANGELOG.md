@@ -11,6 +11,10 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 - **AutoCall Tức thì (Zero Latency)**: Hệ thống nay không còn chờ đợi 1.2s hay 800ms khi người dùng ngừng đọc. Nếu thuật toán khoanh vùng được 1 học sinh khớp 100% ngay giữa câu (interim), nó sẽ tự động chốt kết quả và gửi lệnh gọi lập tức.
 - **Loại bỏ độ trễ phát loa (Event-Driven)**: Viết lại luồng xử lý trên trang Lớp học (`receiver.html`). Loa sẽ phát ra tín hiệu ngay ở mili-giây đầu tiên khi có dữ liệu từ Firebase thay vì phải chờ bộ đếm `setInterval` quét như trước đây, tiết kiệm tối đa thời gian chờ đợi.
 
+### Fixed (Đã sửa)
+- **Sửa lỗi lặp giọng đọc (Double Audio Spam)**: Thêm cơ chế Debounce ở tầng âm thanh. Nếu phát hiện hệ thống nhận tín hiệu hoặc bắt gặp danh sách gửi lệnh gọi một người quá 2 lần trong vòng 4 giây, hệ thống sẽ tự động hủy bỏ lệnh phía sau, giúp không bao giờ bị tình trạng đọc đè hoặc nhắc lại thừa thãi.
+- **Sửa lỗi AutoCall khi gõ chữ**: Khi dùng tính năng Tìm kiếm thủ công (Gõ phím), hệ thống sẽ không tự động gọi nữa mà yêu cầu người dùng phải tự nhấp chọn, tránh tình trạng gõ nhầm chữ nhưng máy tự chốt kết quả sai.
+
 ---
 
 ## [1.12.0] - 2026-08-08
