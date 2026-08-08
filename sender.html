@@ -967,9 +967,9 @@
             // Tìm số lớp (ví dụ: "8/4", "84", "102") có trong query để lọc nghiêm ngặt
             let queryClass = null;
             let targetWords = [];
-            const classMatch = queryNoMark.match(/\b(\d{1,2}\/\d{1,2}|\d{2,4})\b/);
+            const classMatch = queryNoMark.match(/\b(\d{1,2}[\/\s]\d{1,2}|\d{2,4})\b/);
             if (classMatch) {
-                queryClass = classMatch[1].replace(/\//g, ''); // "8/4" -> "84"
+                queryClass = classMatch[1].replace(/[\/\s]/g, ''); // "8/4" -> "84", "9 5" -> "95"
                 
                 const beforeClassStr = queryNoMark.substring(0, classMatch.index).trim();
                 targetWords = beforeClassStr.split(/\s+/).filter(w => w.length > 0);
@@ -1006,7 +1006,7 @@
             }
 
             // Loại bỏ các từ vô nghĩa khỏi targetWords để so khớp chính xác tên
-            const stopWords = ['gọi', 'tìm', 'em', 'học', 'sinh', 'bạn', 'cháu', 'con'];
+            const stopWords = ['gọi', 'tìm', 'em', 'học', 'sinh', 'bạn', 'cháu', 'con', 'lớp', 'lop'];
             const cleanTargetWords = targetWords.filter(w => !stopWords.includes(w));
             const cleanQuery = cleanTargetWords.join(" ");
 

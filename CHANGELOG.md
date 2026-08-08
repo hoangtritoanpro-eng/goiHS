@@ -4,6 +4,13 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.11.1] - 2026-08-08
+
+### Fixed (Đã sửa)
+- **Sửa lỗi nhận diện lớp khi đọc giọng nói**: Cập nhật biểu thức chính quy (regex) xử lý số lớp để hỗ trợ bắt được các cụm từ lớp có khoảng trắng (ví dụ: "9 5" thay vì chỉ "9/5" hay "95"). Bổ sung các từ khóa "lớp", "lop" vào danh sách stopWords để loại bỏ khi đối chiếu tên, giúp tăng độ chính xác lên tối đa và không còn bị gọi nhầm các học sinh khác lớp (ví dụ lớp 7/5 khi gọi lớp 9/5).
+
+---
+
 ## [1.11.0] - 2026-08-06
 
 ### Fixed (Đã sửa)
