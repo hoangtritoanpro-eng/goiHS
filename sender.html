@@ -485,6 +485,8 @@
         // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
         const globalAudioPlayer = new Audio();
         globalAudioPlayer.style.display = 'none';
+        globalAudioPlayer.playbackRate = 0.85; // Làm chậm giọng đọc 15%
+        globalAudioPlayer.preservesPitch = true; // Giữ nguyên cao độ (không bị méo tiếng)
         document.body.appendChild(globalAudioPlayer);
 
         // Lấy quyền Audio từ click đầu tiên trên body
@@ -544,21 +546,17 @@
 
         async function prefetchBlobAndPlay(text) {
             if (useDeviceTTS || !currentTtsUrl) {
+                console.warn("Đang chờ link AI Voice hoặc đang chọn chế độ thiết bị. Bỏ qua Safari.");
                 return {
                     play: (onEnd, onError) => {
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = 'vi-VN';
-                        utterance.rate = 0.9;
-                        utterance.onend = onEnd;
-                        utterance.onerror = onError;
-                        window.speechSynthesis.speak(utterance);
+                        if (onEnd) onEnd();
                     }
                 };
             }
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // Tăng timeout lên 30s cho Colab
 
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
                 const response = await fetch(`${baseUrl}/tts?text=${encodeURIComponent(text)}`, {
@@ -584,15 +582,11 @@
                     }
                 };
             } catch (error) {
-                console.warn("Không kết nối được server TTS local, dùng giọng đọc mặc định của trình duyệt.", error);
+                console.warn("Lỗi server AI, bỏ qua câu này không dùng giọng Safari:", error);
                 return {
                     play: (onEnd, onError) => {
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = 'vi-VN';
-                        utterance.rate = 0.9;
-                        utterance.onend = onEnd;
-                        utterance.onerror = onError;
-                        window.speechSynthesis.speak(utterance);
+                        // Nếu lỗi thì im lặng chuyển qua câu tiếp theo
+                        if (onEnd) onEnd();
                     }
                 };
             }

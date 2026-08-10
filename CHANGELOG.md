@@ -4,6 +4,17 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.13.1] - 2026-08-10
+
+### Changed (Đã tối ưu)
+- **Cải thiện độ trễ TTS (Timeout)**: Tăng thời gian chờ kết nối máy chủ Colab TTS (AI Voice) từ 5 giây lên 30 giây trong `sender.html` và `receiver.html` để hỗ trợ phản hồi tốt hơn khi máy chủ tải nặng.
+- **Tốc độ đọc giọng Clone**: Điều chỉnh tốc độ giọng Clone chậm lại 15% (playbackRate = 0.85, preservesPitch = true) để giọng đọc tự nhiên, truyền cảm và dễ nghe hơn.
+
+### Fixed (Đã sửa)
+- **Gỡ bỏ hoàn toàn giọng mặc định Safari**: Xóa bỏ tính năng dự phòng bằng giọng đọc của thiết bị (SpeechSynthesisUtterance) trên cả 2 màn hình. Hiện tại ứng dụng sẽ bắt buộc ưu tiên 100% sử dụng giọng Clone từ Colab AI nhằm tránh tình trạng chuyển đổi giọng đột ngột gây khó chịu.
+
+---
+
 ## [1.13.0] - 2026-08-08
 
 ### Changed (Đã tối ưu)
