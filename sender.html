@@ -600,12 +600,9 @@
             isPlaying = true;
             const item = audioQueue.shift();
             
-            // Chạy song song: phát tiếng Ting Ting và Tải toàn bộ âm thanh
-            const chimePromise = new Promise(resolve => playChime(resolve));
-            
             let streamPlayer;
             try {
-                // Đợi tải xong 100% âm thanh để không bao giờ bị vấp (stutter)
+                // Đợi tải xong 100% âm thanh từ máy chủ AI TRƯỚC
                 streamPlayer = await item.streamPromise;
             } catch (e) {
                 console.error("Loi tai am thanh:", e);
@@ -613,10 +610,11 @@
                 return;
             }
             
-            // Đợi tiếng Ting Ting kêu xong
+            // CHỈ PHÁT tiếng Ting Ting ngay trước khi đọc (khi AI đã load xong)
+            const chimePromise = new Promise(resolve => playChime(resolve));
             await chimePromise;
             
-            // Phát âm thanh mượt mà liên tục
+            // Phát âm thanh mượt mà liên tục ngay sau tiếng Ting Ting
             streamPlayer.play(
                 () => playNextInQueue(), 
                 (e) => {
