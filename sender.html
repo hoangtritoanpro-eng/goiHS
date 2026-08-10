@@ -485,7 +485,7 @@
         // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
         const globalAudioPlayer = new Audio();
         globalAudioPlayer.style.display = 'none';
-        globalAudioPlayer.playbackRate = 0.85; // Làm chậm giọng đọc 15%
+        globalAudioPlayer.playbackRate = 0.75; // Làm chậm giọng đọc 25% để rõ ràng hơn
         globalAudioPlayer.preservesPitch = true; // Giữ nguyên cao độ (không bị méo tiếng)
         document.body.appendChild(globalAudioPlayer);
 
@@ -525,14 +525,16 @@
                 const gainNode = ctx.createGain();
                 osc.connect(gainNode); gainNode.connect(ctx.destination);
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(659.25, ctx.currentTime);
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(880, ctx.currentTime); // Note A5 (Tiếng ting ngắn)
+                
                 gainNode.gain.setValueAtTime(0, ctx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.02);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                
                 osc.start(ctx.currentTime); 
-                osc.stop(ctx.currentTime + 0.3);
-                setTimeout(() => { if (callback) callback(); }, 350);
+                osc.stop(ctx.currentTime + 0.15);
+                
+                setTimeout(() => { if (callback) callback(); }, 150);
             } catch (e) {
                 console.error("Audio API error:", e);
                 if (callback) callback();
@@ -798,7 +800,7 @@
                     pendingSpeakIds.delete(data.id);
                     updateWaitStatusUI(data.id, false);
                     let classClean = getCleanClass(data.className);
-                    speak(`${data.name}${classClean}.`);
+                    speak(`${data.name}, lớp${classClean}.`);
                 } else {
                     updateWaitStatusUI(data.id, true, data.className);
                 }
@@ -968,33 +970,41 @@
 
         function findStudent(query, autoCall = false) {
             resultsDiv.innerHTML = "";
-            const queryNoMark = removeDiacritics(query);
+            let queryNoMark = removeDiacritics(query);
+            queryNoMark = queryNoMark.replace(/\bphan\b/g, ' '); // Xóa chữ "phần" nếu đọc "lớp 9 phần 5"
             
-            // Tìm số lớp (ví dụ: "8/4", "84", "102") có trong query để lọc nghiêm ngặt
-            // Chuyển đổi các từ chỉ số sau chữ "lớp" thành số (để xử lý giọng nói "lớp tám bốn")
             let queryForClass = queryNoMark;
-            const lopIndex = queryForClass.indexOf('lop');
+            const lopIndex = queryForClass.indexOf('lop ');
+            
             if (lopIndex !== -1) {
                 let classPart = queryForClass.substring(lopIndex);
-                classPart = classPart.replace(/\b(mot|hai|ba|bon|tu|nam|sau|bay|tam|chin)\b/g, match => {
-                    const map = {'mot':'1','hai':'2','ba':'3','bon':'4','tu':'4','nam':'5','sau':'6','bay':'7','tam':'8','chin':'9'};
+                classPart = classPart.replace(/\b(mot|hai|ba|bon|tu|nam|sau|bay|tam|chin|muoi)\b/g, match => {
+                    const map = {'mot':'1','hai':'2','ba':'3','bon':'4','tu':'4','nam':'5','sau':'6','bay':'7','tam':'8','chin':'9','muoi':'10'};
                     return map[match];
                 });
+                // Ép các số liền nhau (vd: "lop 9 5" -> "lop 95")
+                classPart = classPart.replace(/(\d)\s+(\d)/g, "$1$2");
                 queryForClass = queryForClass.substring(0, lopIndex) + classPart;
             }
 
             let queryClass = null;
             let targetWords = [];
-            const classMatch = queryForClass.match(/\b(\d{1,2}[\/\s]\d{1,2}|\d{2,4})\b/);
+            
+            // Tìm regex bắt lớp: "9a", "9/5", "95", "10a1"
+            const classMatch = queryForClass.match(/\blop\s+([a-z0-9]+)\b/);
             if (classMatch) {
-                queryClass = classMatch[1].replace(/[\/\s]/g, ''); // "8/4" -> "84", "9 5" -> "95"
-                
-                // Lấy phần tên trước khi có thông tin lớp
-                const cutoffIndex = lopIndex !== -1 ? lopIndex : classMatch.index;
-                const beforeClassStr = queryNoMark.substring(0, cutoffIndex).trim();
+                queryClass = classMatch[1]; // "95", "9a"
+                const beforeClassStr = queryNoMark.substring(0, lopIndex).trim();
                 targetWords = beforeClassStr.split(/\s+/).filter(w => w.length > 0);
             } else {
-                targetWords = queryNoMark.split(/\s+/).filter(w => w.length > 0);
+                // Fallback nếu không có chữ "lớp" nhưng có số đuôi (vd: "Nguyễn Văn A 95")
+                const endMatch = queryForClass.match(/\s([a-z0-9]+)$/);
+                if (endMatch && endMatch[1].match(/\d/)) { // Nếu từ cuối cùng có chứa số
+                    queryClass = endMatch[1];
+                    targetWords = queryNoMark.substring(0, queryNoMark.lastIndexOf(endMatch[1])).trim().split(/\s+/).filter(w => w.length > 0);
+                } else {
+                    targetWords = queryNoMark.split(/\s+/).filter(w => w.length > 0);
+                }
             }
 
             // Chuyển object sang array để dễ xử lý, gộp Tên và Lớp vào searchString
@@ -1004,7 +1014,7 @@
                 
                 const classNoMark = s.className ? removeDiacritics(s.className.toLowerCase()) : '';
                 const pureClass = classNoMark.split('_')[0]; // "8/4_cs5" -> "8/4"
-                const classNoSlash = pureClass ? pureClass.replace(/\//g, '') : ''; // "8/4" -> "84"
+                const classNoSlash = pureClass ? pureClass.replace(/[\/\-\s]/g, '') : ''; // "8/4" -> "84", "9 A" -> "9a"
                 
                 return {
                     id: key,
@@ -1017,11 +1027,11 @@
                 };
             });
 
-            // Lọc nghiêm ngặt: Nếu query chứa thông tin lớp, chỉ giữ lại học sinh thuộc lớp đó
+            // 1. LỌC CỨNG THEO LỚP (Nếu người dùng có đọc lớp, bắt buộc phải lọc lớp trước khi tìm tên)
             if (queryClass) {
                 const filtered = studentsArray.filter(s => s.pureClassNoSlash === queryClass);
                 if (filtered.length > 0) {
-                    studentsArray = filtered;
+                    studentsArray = filtered; // Thu hẹp phạm vi tìm kiếm chỉ trong lớp này
                 }
             }
 
