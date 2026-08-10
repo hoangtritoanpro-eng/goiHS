@@ -1144,7 +1144,12 @@
             let shouldAutoCall = autoCall;
             if (!shouldAutoCall && matches.length === 1 && exactMatches.length === 1 && matches[0].score >= 100) {
                 if (typeof isListening !== 'undefined' && isListening) {
-                    shouldAutoCall = true;
+                    // CỰC KỲ QUAN TRỌNG: Tránh lỗi vừa đọc chữ "Quốc" đã tự động chốt thành "Nguyễn Cường Quốc".
+                    // Chỉ chốt kết quả interim (giữa chừng) NẾU đã đọc ít nhất 2 chữ (vd "Quốc Khánh"), 
+                    // HOẶC nếu đã xác định được lớp (vd "84").
+                    if (cleanTargetWords.length >= 2 || queryClass) {
+                        shouldAutoCall = true;
+                    }
                 }
             }
 
