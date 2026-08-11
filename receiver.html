@@ -498,30 +498,29 @@
             }
         }
 
-        // Lắng nghe các thông báo đọc lệnh trực tiếp (để đảm bảo âm thanh luôn phát qua receiver)
-        let initialAnnouncementLoaded = false;
-        let lastAnnouncementId = null;
-
-        database.ref('settings/latestAnnouncement').on('value', (snapshot) => {
-            if (!isStarted) return;
-            const data = snapshot.val();
-            if (data && data.text && data.id) {
-                if (!initialAnnouncementLoaded) {
-                    initialAnnouncementLoaded = true;
-                    lastAnnouncementId = data.id;
-                    return; // Bỏ qua lần load đầu tiên (đọc lại đồ cũ)
-                }
-                
-                if (data.id !== lastAnnouncementId) {
-                    lastAnnouncementId = data.id;
-                    speak(data.text);
-                }
-            } else {
-                initialAnnouncementLoaded = true;
-            }
-        });
-
         function initFirebaseListener() {
+            let initialAnnouncementLoaded = false;
+            let lastAnnouncementId = null;
+
+            database.ref('settings/latestAnnouncement').on('value', (snapshot) => {
+                if (!isStarted) return;
+                const data = snapshot.val();
+                if (data && data.text && data.id) {
+                    if (!initialAnnouncementLoaded) {
+                        initialAnnouncementLoaded = true;
+                        lastAnnouncementId = data.id;
+                        return; // Bỏ qua lần load đầu tiên (đọc lại đồ cũ)
+                    }
+                    
+                    if (data.id !== lastAnnouncementId) {
+                        lastAnnouncementId = data.id;
+                        speak(data.text);
+                    }
+                } else {
+                    initialAnnouncementLoaded = true;
+                }
+            });
+
             // Lắng nghe sự thay đổi toàn cục để sắp xếp lại danh sách cho đúng thứ tự
             studentsRef.on('value', (snapshot) => {
                 if (!snapshot.exists()) {
