@@ -1238,7 +1238,15 @@
             });
 
             let classClean = getCleanClass(student.className);
-            speak(`${student.name} lớp${classClean} đã về`);
+            const speakText = `${student.name} lớp${classClean} đã về`;
+            
+            // Push trực tiếp vào luồng thông báo để Laptop đọc ngay lập tức (cực kỳ ổn định)
+            database.ref('announcements').push({
+                text: speakText,
+                timestamp: now
+            });
+
+            speak(speakText);
             
             notification.textContent = `${student.name} đã về rồi!`;
             notification.classList.add('show');

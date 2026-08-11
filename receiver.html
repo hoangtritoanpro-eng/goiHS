@@ -421,7 +421,6 @@
 
         let displayedStudents = new Map(); // Lưu ID các học sinh đang hiển thị kèm thông tin
         let pendingSpeakIds = new Set(); // Lưu ID các học sinh đang chờ phát loa
-        let completedLastRecalls = new Map(); // Lưu timestamp recall của học sinh đã về
 
         function getCleanClass(className) {
             let classClean = '';
@@ -499,6 +498,18 @@
             }
         }
 
+        // Lắng nghe các thông báo đọc lệnh trực tiếp (để đảm bảo âm thanh luôn phát qua receiver)
+        database.ref('announcements').on('child_added', (snapshot) => {
+            if (!isStarted) return;
+            const data = snapshot.val();
+            if (data && data.text && data.timestamp) {
+                // Chỉ đọc những thông báo mới (trong vòng 10 giây qua)
+                if (Date.now() - data.timestamp < 10000) {
+                    speak(data.text);
+                }
+            }
+        });
+
         function initFirebaseListener() {
             // Lắng nghe sự thay đổi toàn cục để sắp xếp lại danh sách cho đúng thứ tự
             studentsRef.on('value', (snapshot) => {
@@ -524,25 +535,16 @@
                 const currentDisplayed = new Map(displayedStudents);
                 displayedStudents.clear();
                 
-                // Phát hiện học sinh vừa chuyển sang trạng thái "Đã về" hoặc được nhắc lại
+                // Phát hiện học sinh vừa chuyển sang trạng thái "Đã về"
                 if (isStarted) {
                     studentsArray.forEach(data => {
                         if (data.status === 'completed') {
                             const oldData = currentDisplayed.get(data.id);
-                            const oldRecall = completedLastRecalls.get(data.id);
-                            
-                            // 1. Vừa chuyển từ called sang completed
+                            // Vừa chuyển từ called sang completed
                             if (oldData && oldData.status === 'called') {
                                 let classClean = getCleanClass(data.className);
                                 speak(`${data.name} lớp${classClean} đã về`);
                             }
-                            // 2. Nhắc lại học sinh đã về bằng giọng nói
-                            else if (oldRecall !== undefined && data.lastRecall && data.lastRecall !== oldRecall) {
-                                let classClean = getCleanClass(data.className);
-                                speak(`${data.name} lớp${classClean} đã về`);
-                            }
-                            
-                            completedLastRecalls.set(data.id, data.lastRecall || 0);
                         }
                     });
                 }
