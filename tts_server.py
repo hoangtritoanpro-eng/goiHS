@@ -55,7 +55,7 @@ def generate_tts():
     
     try:
         voice_to_use = CUSTOM_VOICE_NAME if os.path.exists(CUSTOM_VOICE_FILE) else None
-        audio_array = vieneu_model.infer(text, voice=voice_to_use)
+        audio_array = vieneu_model.infer(text, voice=voice_to_use, speed=0.8)
         
         # Chuyen numpy array sang WAV in-memory
         h = io.BytesIO()
@@ -82,7 +82,7 @@ def generate_tts_raw():
     def gen():
         try:
             voice_to_use = CUSTOM_VOICE_NAME if os.path.exists(CUSTOM_VOICE_FILE) else None
-            for chunk in vieneu_model.infer_stream(text, voice=voice_to_use):
+            for chunk in vieneu_model.infer_stream(text, voice=voice_to_use, speed=0.8):
                 if chunk is not None and len(chunk) > 0:
                     yield _pcm16(chunk)
         except Exception as e:

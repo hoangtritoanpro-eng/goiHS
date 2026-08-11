@@ -602,9 +602,12 @@
             isPlaying = true;
             const item = audioQueue.shift();
             
+            // PHÁT tiếng Ting Ting ngay lập tức để người dùng có phản hồi tức thì
+            const chimePromise = new Promise(resolve => playChime(resolve));
+            
             let streamPlayer;
             try {
-                // Đợi tải xong 100% âm thanh từ máy chủ AI TRƯỚC
+                // Đợi tải xong âm thanh từ máy chủ AI
                 streamPlayer = await item.streamPromise;
             } catch (e) {
                 console.error("Loi tai am thanh:", e);
@@ -612,11 +615,10 @@
                 return;
             }
             
-            // CHỈ PHÁT tiếng Ting Ting ngay trước khi đọc (khi AI đã load xong)
-            const chimePromise = new Promise(resolve => playChime(resolve));
+            // Đợi tiếng Ting Ting kêu xong (tránh việc 2 âm thanh đè lên nhau)
             await chimePromise;
             
-            // Phát âm thanh mượt mà liên tục ngay sau tiếng Ting Ting
+            // Phát âm thanh mượt mà
             streamPlayer.play(
                 () => playNextInQueue(), 
                 (e) => {
@@ -800,7 +802,7 @@
                     pendingSpeakIds.delete(data.id);
                     updateWaitStatusUI(data.id, false);
                     let classClean = getCleanClass(data.className);
-                    speak(`${data.name}, lớp${classClean}.`);
+                    speak(`${data.name} lớp${classClean}`);
                 } else {
                     updateWaitStatusUI(data.id, true, data.className);
                 }
@@ -1230,8 +1232,13 @@
             if (lastCallTimes[student.id] && (now - lastCallTimes[student.id] < 3000)) return;
             lastCallTimes[student.id] = now;
 
+            // Báo lên Firebase để Laptop (receiver.html) cũng phát tiếng
+            database.ref('students/' + student.id).update({
+                lastRecall: now
+            });
+
             let classClean = getCleanClass(student.className);
-            speak(`${student.name}${classClean} đã về.`);
+            speak(`${student.name} lớp${classClean} đã về`);
             
             notification.textContent = `${student.name} đã về rồi!`;
             notification.classList.add('show');
