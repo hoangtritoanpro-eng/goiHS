@@ -1241,9 +1241,10 @@
             const speakText = `${student.name} lớp${classClean} đã về`;
             
             // Push trực tiếp vào luồng thông báo để Laptop đọc ngay lập tức (cực kỳ ổn định)
-            database.ref('announcements').push({
+            // Dùng id ngẫu nhiên để tránh lỗi đồng bộ thời gian (clock skew) giữa 2 thiết bị
+            database.ref('settings/latestAnnouncement').set({
                 text: speakText,
-                timestamp: now
+                id: Date.now() + '_' + Math.random()
             });
 
             speak(speakText);

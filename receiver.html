@@ -499,14 +499,25 @@
         }
 
         // Lắng nghe các thông báo đọc lệnh trực tiếp (để đảm bảo âm thanh luôn phát qua receiver)
-        database.ref('announcements').on('child_added', (snapshot) => {
+        let initialAnnouncementLoaded = false;
+        let lastAnnouncementId = null;
+
+        database.ref('settings/latestAnnouncement').on('value', (snapshot) => {
             if (!isStarted) return;
             const data = snapshot.val();
-            if (data && data.text && data.timestamp) {
-                // Chỉ đọc những thông báo mới (trong vòng 10 giây qua)
-                if (Date.now() - data.timestamp < 10000) {
+            if (data && data.text && data.id) {
+                if (!initialAnnouncementLoaded) {
+                    initialAnnouncementLoaded = true;
+                    lastAnnouncementId = data.id;
+                    return; // Bỏ qua lần load đầu tiên (đọc lại đồ cũ)
+                }
+                
+                if (data.id !== lastAnnouncementId) {
+                    lastAnnouncementId = data.id;
                     speak(data.text);
                 }
+            } else {
+                initialAnnouncementLoaded = true;
             }
         });
 
