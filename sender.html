@@ -934,7 +934,17 @@
                 return;
             }
             
-            const triggerKeys = ['Space', 'Enter', 'MediaPlayPause', 'AudioVolumeUp', 'VolumeUp', 'AudioVolumeDown', 'VolumeDown', 'MediaTrackNext'];
+            // Cập nhật để hỗ trợ micro GoCheck Ultra và các loại micro không dây/bút trình chiếu khác
+            const triggerKeys = [
+                'Space', 'Enter', 'MediaPlayPause', 'MediaPlay', 'MediaPause', 
+                'AudioVolumeUp', 'VolumeUp', 'AudioVolumeDown', 'VolumeDown', 
+                'MediaTrackNext', 'MediaTrackPrevious', 'PageUp', 'PageDown',
+                'ArrowUp', 'ArrowDown'
+            ];
+            
+            // Log ra console để gỡ lỗi nếu mic gửi mã phím lạ
+            console.log("Nút bấm được nhấn:", event.code, event.key);
+            
             if (triggerKeys.includes(event.code) || triggerKeys.includes(event.key)) {
                 event.preventDefault(); 
                 micBtn.click();
