@@ -406,8 +406,8 @@
         </div>
         
         <div style="text-align: center; margin-top: 15px;">
-            <button id="toggleAudioBtn" onclick="toggleLocalAudio()" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
-                🔊 Đang Bật Âm Thanh Tại Đây
+            <button id="toggleAudioBtn" onclick="toggleLocalAudio()" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                🔇 Đã Tắt Âm Thanh Tại Đây
             </button>
             <p style="font-size: 12px; color: #666; margin-top: 5px;">(Mặc định tắt trên điện thoại/máy điều khiển để tránh bị vang tiếng với tivi)</p>
         </div>
@@ -628,7 +628,7 @@
             );
         }
 
-        let enableLocalAudio = true; // Mặc định BẬT âm thanh trên điện thoại
+        let enableLocalAudio = false; // Mặc định TẮT âm thanh trên trang quản lý để tránh vang 2 lần với trang Trình chiếu
 
         function toggleLocalAudio() {
             enableLocalAudio = !enableLocalAudio;
