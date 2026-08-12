@@ -359,7 +359,7 @@
             );
         }
 
-        // Hàm phát âm thanh
+        // Hàm phát âm thanh (có chống đọc lại nếu câu giống nhau)
         function speak(text) {
             if(!isStarted) return;
             
@@ -369,10 +369,14 @@
             }
             lastSpokenText = text;
             lastSpokenTime = now;
+            speakImmediate(text);
+        }
 
+        // Hàm phát âm thanh NGAY LẬP TỨC - bỏ qua anti-duplicate (dùng cho thông báo từ điện thoại)
+        function speakImmediate(text) {
+            if(!isStarted) return;
             // Khởi tạo tải âm thanh (Blob) NGAY LẬP TỨC
             const streamPromise = prefetchBlobAndPlay(text);
-            
             audioQueue.push({ text, streamPromise });
             if (!isPlaying) {
                 playNextInQueue();
@@ -513,16 +517,23 @@
                         // Parse timestamp from id (format: timestamp_random)
                         const timestampStr = data.id.split('_')[0];
                         const timestamp = parseInt(timestampStr, 10);
-                        // If it's a recent event (within 15 seconds), play it!
-                        if (!isNaN(timestamp) && Date.now() - timestamp < 15000) {
-                            speak(data.text);
+                        // Nếu thông báo vừa được tạo trong vòng 30 giây -> phát ngay!
+                        if (!isNaN(timestamp) && Date.now() - timestamp < 30000) {
+                            // Dùng speakImmediate để KHÔNG bị anti-duplicate chặn
+                            speakImmediate(data.text);
+                            lastSpokenText = data.text; // Cập nhật để tránh đọc lại ngay sau
+                            lastSpokenTime = Date.now();
                         }
-                        return; // Bỏ qua nếu là đồ cũ
+                        return;
                     }
                     
                     if (data.id !== lastAnnouncementId) {
                         lastAnnouncementId = data.id;
-                        speak(data.text);
+                        // Dùng speakImmediate để KHÔNG bị anti-duplicate chặn
+                        // (Vì tên học sinh đã được đọc lúc gọi, giờ đọc lại "đã về" sẽ bị block)
+                        speakImmediate(data.text);
+                        lastSpokenText = data.text;
+                        lastSpokenTime = Date.now();
                     }
                 } else {
                     initialAnnouncementLoaded = true;
