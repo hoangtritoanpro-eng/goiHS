@@ -934,15 +934,18 @@
         let isListening = false;
         let recognitionTimeout = null;
         let lastTranscript = '';
+        let userManuallyStopped = false;
 
         micBtn.addEventListener('click', () => {
             if (!recognition) return;
             
             if (isListening) {
+                userManuallyStopped = true;
                 try { recognition.stop(); } catch(e){}
                 resetMicBtn();
                 return;
             }
+            userManuallyStopped = false;
             try {
                 recognition.start();
             } catch (e) {
@@ -1036,6 +1039,11 @@
 
             recognition.onend = () => {
                 resetMicBtn();
+                if (typeof autoRestartMic !== 'undefined' && autoRestartMic && !wasAutoStopped && !userManuallyStopped) {
+                    setTimeout(() => {
+                        if (!isListening) micBtn.click();
+                    }, 500);
+                }
             };
         }
 
