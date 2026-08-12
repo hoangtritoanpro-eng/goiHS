@@ -425,6 +425,12 @@
                 Dùng giọng đọc của thiết bị (Không cần chạy Python)
             </label>
         </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 16px; font-weight: bold; color: #FF9500;">
+                <input type="checkbox" id="autoRestartMicCheckbox" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleAutoRestartMic(this.checked)">
+                Chế độ Rảnh tay (Tự động bật lại mic sau khi gọi)
+            </label>
+        </div>
     </div>
 
     <div id="results"></div>
@@ -494,6 +500,13 @@
 
         window.toggleIgnoreWaitTime = function(isChecked) {
             database.ref('settings').update({ ignoreWaitTime: isChecked });
+        }
+
+        let autoRestartMic = false;
+        let wasAutoStopped = false;
+        window.toggleAutoRestartMic = function(isChecked) {
+            autoRestartMic = isChecked;
+            if (!isChecked) wasAutoStopped = false;
         }
 
         // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
@@ -611,6 +624,12 @@
         async function playNextInQueue() {
             if (audioQueue.length === 0) {
                 isPlaying = false;
+                if (autoRestartMic && wasAutoStopped && !isListening) {
+                    wasAutoStopped = false;
+                    setTimeout(() => {
+                        if (!isListening) micBtn.click();
+                    }, 500); // Đợi 0.5s sau khi đọc xong để bật lại mic
+                }
                 return;
             }
             isPlaying = true;
@@ -668,7 +687,15 @@
         const announcedCompletedIds = new Set();
 
         function speak(text) {
-            if(!isStarted || !enableLocalAudio) return;
+            if(!isStarted || !enableLocalAudio) {
+                if (autoRestartMic && wasAutoStopped && !isListening) {
+                    wasAutoStopped = false;
+                    setTimeout(() => {
+                        if (!isListening) micBtn.click();
+                    }, 3500); // Ước lượng 3.5s đọc xong tên trên máy tính
+                }
+                return;
+            }
             
             const now = Date.now();
             if (text === lastSpokenText && (now - lastSpokenTime < 4000)) {
@@ -1216,6 +1243,9 @@
                     callStudent(matches[0]);
                 }
                 if (typeof isListening !== 'undefined' && isListening && typeof recognition !== 'undefined' && recognition) {
+                    if (autoRestartMic) {
+                        wasAutoStopped = true;
+                    }
                     try { recognition.stop(); } catch(e){}
                 }
                 return;
