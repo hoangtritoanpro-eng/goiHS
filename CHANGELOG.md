@@ -4,6 +4,15 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.13.2] - 2026-08-12
+
+### Changed (Đã tối ưu)
+- **Định dạng thông báo gọi học sinh**: Lược bỏ chữ "lớp" và chữ "đã về" khi thực hiện gọi tên qua giọng nói (chỉ còn lại "Tên + Lớp"), giúp ngắn gọn và rõ ràng hơn. 
+- **Tốc độ đọc giọng TTS**: Điều chỉnh tốc độ âm thanh chậm thêm (playbackRate từ 0.75 xuống 0.70) trên cả điện thoại và laptop để phát âm rõ chữ hơn.
+
+### Fixed (Đã sửa)
+- **Lỗi không phát âm thanh học sinh đã về**: Sửa lỗi laptop không phát thông báo "đã về" nếu người dùng đọc tên học sinh ngay sau khi vừa tải trang. Cập nhật cơ chế nhận diện thời gian (timestamp) để đảm bảo mọi thông báo mới trong vòng 15 giây luôn được loa laptop phát đầy đủ.
+
 ## [1.13.1] - 2026-08-10
 
 ### Changed (Đã tối ưu)

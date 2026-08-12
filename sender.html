@@ -485,7 +485,7 @@
         // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
         const globalAudioPlayer = new Audio();
         globalAudioPlayer.style.display = 'none';
-        globalAudioPlayer.playbackRate = 0.75; // Làm chậm giọng đọc 25% để rõ ràng hơn
+        globalAudioPlayer.playbackRate = 0.70; // Làm chậm giọng đọc 30% để rõ ràng hơn
         globalAudioPlayer.preservesPitch = true; // Giữ nguyên cao độ (không bị méo tiếng)
         document.body.appendChild(globalAudioPlayer);
 
@@ -802,7 +802,7 @@
                     pendingSpeakIds.delete(data.id);
                     updateWaitStatusUI(data.id, false);
                     let classClean = getCleanClass(data.className);
-                    speak(`${data.name} lớp${classClean}`);
+                    speak(`${data.name}${classClean}`);
                 } else {
                     updateWaitStatusUI(data.id, true, data.className);
                 }
@@ -1238,7 +1238,7 @@
             });
 
             let classClean = getCleanClass(student.className);
-            const speakText = `${student.name} lớp${classClean} đã về`;
+            const speakText = `${student.name}${classClean} đã về`;
             
             // Push trực tiếp vào luồng thông báo để Laptop đọc ngay lập tức (cực kỳ ổn định)
             // Dùng id ngẫu nhiên để tránh lỗi đồng bộ thời gian (clock skew) giữa 2 thiết bị

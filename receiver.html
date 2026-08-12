@@ -382,7 +382,7 @@
         // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
         const globalAudioPlayer = new Audio();
         globalAudioPlayer.style.display = 'none';
-        globalAudioPlayer.playbackRate = 0.75; // Làm chậm giọng đọc 25% để rõ ràng hơn
+        globalAudioPlayer.playbackRate = 0.70; // Làm chậm giọng đọc 30% để rõ ràng hơn
         globalAudioPlayer.preservesPitch = true; // Giữ nguyên cao độ (không bị méo tiếng)
         document.body.appendChild(globalAudioPlayer);
 
@@ -509,7 +509,15 @@
                     if (!initialAnnouncementLoaded) {
                         initialAnnouncementLoaded = true;
                         lastAnnouncementId = data.id;
-                        return; // Bỏ qua lần load đầu tiên (đọc lại đồ cũ)
+                        
+                        // Parse timestamp from id (format: timestamp_random)
+                        const timestampStr = data.id.split('_')[0];
+                        const timestamp = parseInt(timestampStr, 10);
+                        // If it's a recent event (within 15 seconds), play it!
+                        if (!isNaN(timestamp) && Date.now() - timestamp < 15000) {
+                            speak(data.text);
+                        }
+                        return; // Bỏ qua nếu là đồ cũ
                     }
                     
                     if (data.id !== lastAnnouncementId) {
@@ -553,7 +561,7 @@
                             // Vừa chuyển từ called sang completed
                             if (oldData && oldData.status === 'called') {
                                 let classClean = getCleanClass(data.className);
-                                speak(`${data.name} lớp${classClean} đã về`);
+                                speak(`${data.name}${classClean} đã về`);
                             }
                         }
                     });
@@ -659,7 +667,7 @@
                     updateWaitStatusUI(data.id, false);
                     
                     let classClean = getCleanClass(data.className);
-                    speak(`${data.name} lớp${classClean}`);
+                    speak(`${data.name}${classClean}`);
                 } else {
                     updateWaitStatusUI(data.id, true, data.className);
                 }
