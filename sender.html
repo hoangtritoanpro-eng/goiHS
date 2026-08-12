@@ -429,10 +429,50 @@
 
     <div id="results"></div>
     
-    <div id="queueSection" style="margin-top: 40px; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; padding-bottom: 100px;">
+    <div id="queueSection" style="margin-top: 40px; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center;">
         <h2 style="color: #888; text-transform: uppercase; font-size: 20px; margin-bottom: 20px;">Học sinh đang gọi (Vuốt để xoá)</h2>
         <div id="emptyState" style="margin-top: 20px; font-size: 20px; color: #555; display: none;">Chưa có học sinh nào.</div>
         <div id="calledList" style="width: 100%; display: flex; flex-direction: column; gap: 20px;"></div>
+    </div>
+
+    <!-- ===== PANEL MÀN HÌNH LỚP HỌC (receiver.html) ===== -->
+    <div id="receiverPanel" style="
+        width: 100%;
+        max-width: 900px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        border: 2px solid rgba(0,122,255,0.2);
+    ">
+        <!-- Header toggle -->
+        <div onclick="toggleReceiverPanel()" style="
+            background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+            color: white;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        ">
+            <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px;">
+                🖥️ MÀN HÌNH LỚP HỌC (receiver.html)
+            </div>
+            <span id="receiverToggleIcon" style="font-size: 20px; transition: transform 0.3s;">▼</span>
+        </div>
+
+        <!-- Iframe wrapper -->
+        <div id="receiverIframeWrap" style="height: 600px; transition: height 0.4s ease;">
+            <iframe
+                id="receiverIframe"
+                src="receiver.html"
+                style="width: 100%; height: 100%; border: none; display: block; background: #0F1115;"
+                allow="autoplay; microphone"
+                title="Màn hình lớp học"
+            ></iframe>
+        </div>
     </div>
 
     <div id="notification">Đã gọi thành công!</div>
@@ -452,8 +492,22 @@
             document.getElementById('themeToggle').innerText = '☀️';
         }
 
-        let isStarted = false;
+        // Toggle ẩn/hiện iframe receiver.html
+        let receiverPanelOpen = true;
+        function toggleReceiverPanel() {
+            receiverPanelOpen = !receiverPanelOpen;
+            const wrap = document.getElementById('receiverIframeWrap');
+            const icon = document.getElementById('receiverToggleIcon');
+            if (receiverPanelOpen) {
+                wrap.style.height = '600px';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                wrap.style.height = '0px';
+                icon.style.transform = 'rotate(-90deg)';
+            }
+        }
         
+        let isStarted = false;
         let ignoreWaitTime = false;
         database.ref('settings/ignoreWaitTime').on('value', snap => {
             ignoreWaitTime = !!snap.val();
