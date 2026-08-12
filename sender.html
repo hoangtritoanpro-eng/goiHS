@@ -406,10 +406,10 @@
         </div>
         
         <div style="text-align: center; margin-top: 15px;">
-            <button id="toggleAudioBtn" onclick="toggleLocalAudio()" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
-                🔇 Đã Tắt Âm Thanh Tại Đây
+            <button id="toggleAudioBtn" onclick="toggleLocalAudio()" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                🔊 Đang Bật Âm Thanh Tại Đây
             </button>
-            <p style="font-size: 12px; color: #666; margin-top: 5px;">(Mặc định tắt trên điện thoại/máy điều khiển để tránh bị vang tiếng với tivi)</p>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">(Bật để loa phát ngay tại thiết bị này — không cần mở receiver.html riêng)</p>
         </div>
         
         <div style="text-align: center; margin-top: 15px;">
@@ -433,46 +433,6 @@
         <h2 style="color: #888; text-transform: uppercase; font-size: 20px; margin-bottom: 20px;">Học sinh đang gọi (Vuốt để xoá)</h2>
         <div id="emptyState" style="margin-top: 20px; font-size: 20px; color: #555; display: none;">Chưa có học sinh nào.</div>
         <div id="calledList" style="width: 100%; display: flex; flex-direction: column; gap: 20px;"></div>
-    </div>
-
-    <!-- ===== PANEL MÀN HÌNH LỚP HỌC (receiver.html) ===== -->
-    <div id="receiverPanel" style="
-        width: 100%;
-        max-width: 900px;
-        margin-top: 30px;
-        margin-bottom: 40px;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-        border: 2px solid rgba(0,122,255,0.2);
-    ">
-        <!-- Header toggle -->
-        <div onclick="toggleReceiverPanel()" style="
-            background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
-            color: white;
-            padding: 14px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            user-select: none;
-        ">
-            <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px;">
-                🖥️ MÀN HÌNH LỚP HỌC (receiver.html)
-            </div>
-            <span id="receiverToggleIcon" style="font-size: 20px; transition: transform 0.3s;">▼</span>
-        </div>
-
-        <!-- Iframe wrapper -->
-        <div id="receiverIframeWrap" style="height: 600px; transition: height 0.4s ease;">
-            <iframe
-                id="receiverIframe"
-                src="receiver.html"
-                style="width: 100%; height: 100%; border: none; display: block; background: #0F1115;"
-                allow="autoplay; microphone"
-                title="Màn hình lớp học"
-            ></iframe>
-        </div>
     </div>
 
     <div id="notification">Đã gọi thành công!</div>
@@ -682,7 +642,7 @@
             );
         }
 
-        let enableLocalAudio = false; // Mặc định TẮT âm thanh trên trang quản lý để tránh vang 2 lần với trang Trình chiếu
+        let enableLocalAudio = true; // Mặc định BẬT âm thanh (đã tích hợp receiver)
 
         function toggleLocalAudio() {
             enableLocalAudio = !enableLocalAudio;
@@ -695,6 +655,17 @@
                 btn.style.backgroundColor = '#6c757d';
             }
         }
+
+        // Hàm phát NGAY LẬP TỨC (bypass anti-duplicate) — dùng cho thông báo "đã về"
+        function speakImmediate(text) {
+            if (!isStarted) return;
+            const streamPromise = prefetchBlobAndPlay(text);
+            audioQueue.push({ text, streamPromise });
+            if (!isPlaying) playNextInQueue();
+        }
+
+        // Track ID học sinh đã được thông báo "đã về" để không phát lại
+        const announcedCompletedIds = new Set();
 
         function speak(text) {
             if(!isStarted || !enableLocalAudio) return;
@@ -786,6 +757,24 @@
             const currentDisplayed = new Map(displayedStudents);
             displayedStudents.clear();
             calledList.innerHTML = '';
+
+            // ---- PHÁT "ĐÃ VỀ" khi học sinh chuyển sang completed ----
+            if (isStarted) {
+                studentsArray.forEach(data => {
+                    if (data.status === 'completed' && !announcedCompletedIds.has(data.id)) {
+                        const oldData = currentDisplayed.get(data.id);
+                        const justViaOldData = oldData && oldData.status === 'called';
+                        const justViaTimestamp = data.completedAt && (Date.now() - data.completedAt < 15000);
+                        if (justViaOldData || justViaTimestamp) {
+                            announcedCompletedIds.add(data.id);
+                            let classClean = getCleanClass(data.className);
+                            speakImmediate(`${data.name}${classClean} đã về`);
+                        } else {
+                            announcedCompletedIds.add(data.id); // completed cũ, không phát
+                        }
+                    }
+                });
+            }
 
             calledStudents.forEach(data => {
                 displayedStudents.set(data.id, data);
