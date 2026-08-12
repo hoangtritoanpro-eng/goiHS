@@ -572,7 +572,12 @@
                             // Vừa chuyển từ called sang completed
                             if (oldData && oldData.status === 'called') {
                                 let classClean = getCleanClass(data.className);
-                                speak(`${data.name}${classClean} đã về`);
+                                const doneText = `${data.name}${classClean} đã về`;
+                                // Dùng speakImmediate: KHÔNG bị anti-duplicate chặn
+                                // vì trước đó vừa đọc "Mai Nam tám tư" (khác text), nhưng vẫn cần chủ động cập nhật lastSpokenText
+                                speakImmediate(doneText);
+                                lastSpokenText = doneText;
+                                lastSpokenTime = Date.now();
                             }
                         }
                     });
