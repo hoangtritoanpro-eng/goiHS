@@ -286,6 +286,9 @@
             if (val) currentTtsUrl = val;
         });
 
+        // Track ID học sinh đã được thông báo "đã về" để không phát lại
+        const announcedCompletedIds = new Set();
+
         async function prefetchBlobAndPlay(text) {
             try {
                 const controller = new AbortController();
@@ -568,16 +571,28 @@
                 if (isStarted) {
                     studentsArray.forEach(data => {
                         if (data.status === 'completed') {
-                            const oldData = currentDisplayed.get(data.id);
-                            // Vừa chuyển từ called sang completed
-                            if (oldData && oldData.status === 'called') {
-                                let classClean = getCleanClass(data.className);
-                                const doneText = `${data.name}${classClean} đã về`;
-                                // Dùng speakImmediate: KHÔNG bị anti-duplicate chặn
-                                // vì trước đó vừa đọc "Mai Nam tám tư" (khác text), nhưng vẫn cần chủ động cập nhật lastSpokenText
-                                speakImmediate(doneText);
-                                lastSpokenText = doneText;
-                                lastSpokenTime = Date.now();
+                            // Cách cũ: chỉ phát khi oldData.status === 'called' → BỎ QUA nếu điện thoại gọi+Đã về quá nhanh
+                            // Cách mới: phát khi:
+                            //   1. Chưa được thông báo (không có trong announcedCompletedIds)
+                            //   VÀ
+                            //   2a. Vừa chuyển từ called sang completed (oldData.status === 'called') HOẶC
+                            //   2b. completedAt timestamp mới (trong vòng 15 giây) – bắt trường hợp điện thoại gọi+Đã về nhanh
+                            if (!announcedCompletedIds.has(data.id)) {
+                                const oldData = currentDisplayed.get(data.id);
+                                const justCompletedViaOldData = oldData && oldData.status === 'called';
+                                const justCompletedViaTimestamp = data.completedAt && (Date.now() - data.completedAt < 15000);
+                                
+                                if (justCompletedViaOldData || justCompletedViaTimestamp) {
+                                    announcedCompletedIds.add(data.id);
+                                    let classClean = getCleanClass(data.className);
+                                    const doneText = `${data.name}${classClean} đã về`;
+                                    speakImmediate(doneText);
+                                    lastSpokenText = doneText;
+                                    lastSpokenTime = Date.now();
+                                } else if (!justCompletedViaOldData && !justCompletedViaTimestamp) {
+                                    // Completed cũ (trước khi mở trang) → chỉ đánh dấu, không phát
+                                    announcedCompletedIds.add(data.id);
+                                }
                             }
                         }
                     });
@@ -733,7 +748,8 @@
         // Hàm được gọi khi giáo viên bấm nút "Đã về"
         window.markAsCompleted = function(id) {
             studentsRef.child(id).update({
-                status: 'completed'
+                status: 'completed',
+                completedAt: Date.now()
             }).catch(err => {
                 alert("Lỗi cập nhật trạng thái: " + err.message);
                 console.error("Lỗi cập nhật trạng thái:", err);

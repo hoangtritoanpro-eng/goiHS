@@ -837,7 +837,7 @@
         }
 
         window.markAsCompleted = function(id) {
-            studentsRef.child(id).update({ status: 'completed' });
+            studentsRef.child(id).update({ status: 'completed', completedAt: Date.now() });
         }
         
         window.triggerRecall = function(id) {
