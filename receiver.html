@@ -318,11 +318,26 @@
                     }
                 };
             } catch (error) {
-                console.warn("Lỗi server AI, bỏ qua câu này không dùng giọng Safari:", error);
+                console.warn("Lỗi server AI, chuyển sang giọng đọc mặc định của trình duyệt:", error);
                 return {
                     play: (onEnd, onError) => {
-                        // Nếu lỗi thì im lặng chuyển qua câu tiếp theo
-                        if (onEnd) onEnd();
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'vi-VN';
+                        
+                        // Cố gắng tìm giọng Hoài My hoặc giọng tiếng Việt tốt nhất có sẵn
+                        const availableVoices = window.speechSynthesis.getVoices();
+                        const hoaiMyVoice = availableVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
+                        const viVoice = availableVoices.find(v => v.lang.includes('vi'));
+                        
+                        if (hoaiMyVoice) {
+                            utterance.voice = hoaiMyVoice;
+                        } else if (viVoice) {
+                            utterance.voice = viVoice;
+                        }
+
+                        utterance.onend = onEnd;
+                        utterance.onerror = onError;
+                        window.speechSynthesis.speak(utterance);
                     }
                 };
             }
