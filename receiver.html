@@ -232,8 +232,14 @@
         const emptyState = document.getElementById('emptyState');
 
         let isStarted = false;
-        let voices = [];
+        let sysVoices = [];
         let globalAudioCtx = null;
+
+        function loadVoices() {
+            sysVoices = window.speechSynthesis.getVoices();
+        }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
 
         // Hàm phát chuông thông báo (Airport Chime)
         function playChime(callback) {
@@ -292,7 +298,8 @@
         async function prefetchBlobAndPlay(text) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // Tăng timeout lên 30s cho Colab
+                // Tạm thời giảm timeout xuống 3s (3000ms) để nếu server tắt thì nó fallback ngay sang giọng Edge
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
 
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
                 const response = await fetch(`${baseUrl}/tts?text=${encodeURIComponent(text)}`, {
@@ -324,10 +331,10 @@
                         const utterance = new SpeechSynthesisUtterance(text);
                         utterance.lang = 'vi-VN';
                         
-                        // Cố gắng tìm giọng Hoài My hoặc giọng tiếng Việt tốt nhất có sẵn
-                        const availableVoices = window.speechSynthesis.getVoices();
-                        const hoaiMyVoice = availableVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
-                        const viVoice = availableVoices.find(v => v.lang.includes('vi'));
+                        // Cố gắng tìm giọng Hoài My hoặc giọng tiếng Việt tốt nhất có sẵn từ danh sách đã load
+                        if (sysVoices.length === 0) sysVoices = window.speechSynthesis.getVoices();
+                        const hoaiMyVoice = sysVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
+                        const viVoice = sysVoices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
                         
                         if (hoaiMyVoice) {
                             utterance.voice = hoaiMyVoice;
