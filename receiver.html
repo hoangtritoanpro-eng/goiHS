@@ -342,8 +342,29 @@
                             utterance.voice = viVoice;
                         }
 
-                        utterance.onend = onEnd;
-                        utterance.onerror = onError;
+                        let isEnded = false;
+                        utterance.onend = () => {
+                            if (!isEnded) {
+                                isEnded = true;
+                                if (onEnd) onEnd();
+                            }
+                        };
+                        utterance.onerror = () => {
+                            if (!isEnded) {
+                                isEnded = true;
+                                if (onError) onError();
+                                else if (onEnd) onEnd();
+                            }
+                        };
+                        
+                        // Failsafe: nếu kẹt quá 10 giây thì ép cho qua câu tiếp theo
+                        setTimeout(() => {
+                            if (!isEnded) {
+                                isEnded = true;
+                                if (onEnd) onEnd();
+                            }
+                        }, 10000);
+                        
                         window.speechSynthesis.speak(utterance);
                     }
                 };
@@ -417,20 +438,20 @@
 
         // Bắt sự kiện bấm nút Bắt Đầu
         startBtn.addEventListener('click', () => {
-            // Mở khóa AudioContext và SpeechSynthesis cho trình duyệt di động (iOS Safari)
+            // Mở khóa AudioContext cho trình duyệt di động
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             osc.connect(ctx.destination);
             osc.start();
             osc.stop(ctx.currentTime + 0.001);
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
 
+            // Xóa dòng speak('') vì nó có thể làm treo SpeechSynthesis trên Edge/Chrome
+            
             // Mở khóa HTML5 Audio Player (cho iOS Safari)
             globalAudioPlayer.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; // âm thanh rỗng siêu ngắn
             globalAudioPlayer.play().catch(e => console.log('Unlock audio failed', e));
 
-            // Bypass chính sách chặn audio tự động phát của Safari/Chrome
-            // Bằng cách phát 1 câu tĩnh ngay trong callback click user
+            // Phát ngay 1 câu thực tế để unlock
             speak("Chế độ đón học sinh đã được kích hoạt.");
             
             isStarted = true;
