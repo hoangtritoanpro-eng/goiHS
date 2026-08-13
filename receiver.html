@@ -296,9 +296,43 @@
         const announcedCompletedIds = new Set();
 
         async function prefetchBlobAndPlay(text) {
+            const fallbackPlay = (onEnd, onError) => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                
+                if (sysVoices.length === 0) sysVoices = window.speechSynthesis.getVoices();
+                const hoaiMyVoice = sysVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
+                const viVoice = sysVoices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
+                
+                if (hoaiMyVoice) {
+                    utterance.voice = hoaiMyVoice;
+                } else if (viVoice) {
+                    utterance.voice = viVoice;
+                }
+
+                let isEnded = false;
+                const endHandler = () => {
+                    if (!isEnded) {
+                        isEnded = true;
+                        if (onEnd) onEnd();
+                    }
+                };
+                utterance.onend = endHandler;
+                utterance.onerror = () => {
+                    if (!isEnded) {
+                        isEnded = true;
+                        if (onError) onError();
+                        else if (onEnd) onEnd();
+                    }
+                };
+                
+                // Failsafe: nếu kẹt quá 10 giây thì ép cho qua câu tiếp theo
+                setTimeout(endHandler, 10000);
+                window.speechSynthesis.speak(utterance);
+            };
+
             try {
                 const controller = new AbortController();
-                // Tạm thời giảm timeout xuống 3s (3000ms) để nếu server tắt thì nó fallback ngay sang giọng Edge
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
 
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
@@ -314,60 +348,27 @@
                 
                 if (!response.ok) throw new Error("Network response was not ok");
                 const blob = await response.blob();
+                if (!blob.type.includes('audio')) throw new Error("Not an audio file");
+
                 const url = URL.createObjectURL(blob);
                 
                 return {
                     play: (onEnd, onError) => {
                         globalAudioPlayer.src = url;
                         globalAudioPlayer.onended = onEnd;
-                        globalAudioPlayer.onerror = onError;
-                        globalAudioPlayer.play().catch(onError);
+                        globalAudioPlayer.onerror = (e) => {
+                            console.warn("Audio player error, falling back to TTS", e);
+                            fallbackPlay(onEnd, onError);
+                        };
+                        globalAudioPlayer.play().catch(e => {
+                            console.warn("Play blocked or failed, falling back to TTS", e);
+                            fallbackPlay(onEnd, onError);
+                        });
                     }
                 };
             } catch (error) {
                 console.warn("Lỗi server AI, chuyển sang giọng đọc mặc định của trình duyệt:", error);
-                return {
-                    play: (onEnd, onError) => {
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = 'vi-VN';
-                        
-                        // Cố gắng tìm giọng Hoài My hoặc giọng tiếng Việt tốt nhất có sẵn từ danh sách đã load
-                        if (sysVoices.length === 0) sysVoices = window.speechSynthesis.getVoices();
-                        const hoaiMyVoice = sysVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
-                        const viVoice = sysVoices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
-                        
-                        if (hoaiMyVoice) {
-                            utterance.voice = hoaiMyVoice;
-                        } else if (viVoice) {
-                            utterance.voice = viVoice;
-                        }
-
-                        let isEnded = false;
-                        utterance.onend = () => {
-                            if (!isEnded) {
-                                isEnded = true;
-                                if (onEnd) onEnd();
-                            }
-                        };
-                        utterance.onerror = () => {
-                            if (!isEnded) {
-                                isEnded = true;
-                                if (onError) onError();
-                                else if (onEnd) onEnd();
-                            }
-                        };
-                        
-                        // Failsafe: nếu kẹt quá 10 giây thì ép cho qua câu tiếp theo
-                        setTimeout(() => {
-                            if (!isEnded) {
-                                isEnded = true;
-                                if (onEnd) onEnd();
-                            }
-                        }, 10000);
-                        
-                        window.speechSynthesis.speak(utterance);
-                    }
-                };
+                return { play: fallbackPlay };
             }
         }
 
