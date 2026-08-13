@@ -179,3 +179,7 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 ---
 *Ghi chú: Phase 1 (MVP) đã hoàn thành và sẵn sàng nghiệm thu.*
+
+### Th�m m?i
+- T�ch h?p API gi?ng d?c mi?n ph� c?a tr�nh duy?t Microsoft Edge (Edge TTS) thay th? cho Vieneu TTS. H? tr? gi?ng Ho�i My v� Nam Minh, cho t?c d? ph?n h?i nhanh hon v� kh�ng c?n t?i model n?ng.
+
