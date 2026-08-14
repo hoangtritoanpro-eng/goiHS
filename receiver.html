@@ -208,6 +208,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Microsoft Azure Speech SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
 </head>
 <body>
 
@@ -229,6 +231,44 @@
     <!-- Nhúng cấu hình Firebase -->
     <script src="firebase-config.js"></script>
     <script>
+        // Cấu hình Azure Speech SDK
+        const AZURE_KEY = "YOUR_KEY_HERE"; // THAY BẰNG KEY CỦA BẠN
+        const AZURE_REGION = "YOUR_REGION_HERE"; // THAY BẰNG REGION (ví dụ: southeastasia)
+
+        async function callStudentWithAzure(studentName) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(AZURE_KEY, AZURE_REGION);
+                    speechConfig.speechSynthesisVoiceName = "vi-VN-NamMinhNeural";
+                    
+                    const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+                    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+                    
+                    synthesizer.speakTextAsync(
+                        studentName,
+                        (result) => {
+                            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+                                console.log(`[Azure TTS] Đã phát thành công: ${studentName}`);
+                                resolve(true);
+                            } else {
+                                console.error("[Azure TTS] Lỗi khi phát: ", result.errorDetails);
+                                reject(result.errorDetails);
+                            }
+                            synthesizer.close();
+                        },
+                        (error) => {
+                            console.error("[Azure TTS] Lỗi hệ thống: ", error);
+                            synthesizer.close();
+                            reject(error);
+                        }
+                    );
+                } catch (error) {
+                    console.error("[Azure TTS] Lỗi khởi tạo SDK:", error);
+                    reject(error);
+                }
+            });
+        }
+
         const startBtn = document.getElementById('startBtn');
         const startScreen = document.getElementById('startScreen');
         const mainScreen = document.getElementById('mainScreen');
@@ -301,38 +341,15 @@
 
         async function prefetchBlobAndPlay(text) {
             const fallbackPlay = (onEnd, onError) => {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'vi-VN';
-                
-                if (sysVoices.length === 0) sysVoices = window.speechSynthesis.getVoices();
-                const hoaiMyVoice = sysVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
-                const viVoice = sysVoices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
-                
-                if (hoaiMyVoice) {
-                    utterance.voice = hoaiMyVoice;
-                } else if (viVoice) {
-                    utterance.voice = viVoice;
-                }
-
-                let isEnded = false;
-                const endHandler = () => {
-                    if (!isEnded) {
-                        isEnded = true;
+                callStudentWithAzure(text)
+                    .then(() => {
                         if (onEnd) onEnd();
-                    }
-                };
-                utterance.onend = endHandler;
-                utterance.onerror = () => {
-                    if (!isEnded) {
-                        isEnded = true;
+                    })
+                    .catch((err) => {
+                        console.error("Lỗi Azure TTS fallback:", err);
                         if (onError) onError();
                         else if (onEnd) onEnd();
-                    }
-                };
-                
-                // Failsafe: nếu kẹt quá 10 giây thì ép cho qua câu tiếp theo
-                setTimeout(endHandler, 10000);
-                window.speechSynthesis.speak(utterance);
+                    });
             };
 
             const useBrowserTts = document.getElementById('useBrowserTts');

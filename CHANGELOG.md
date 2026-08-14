@@ -4,6 +4,13 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.14.0] - 2026-08-14
+
+### Added (Thêm mới)
+- **Tích hợp Azure Speech SDK**: Cấu hình sử dụng SDK của Microsoft với giọng đọc vi-VN-NamMinhNeural cho tính năng TTS trong 
+eceiver.html nhằm sửa lỗi không phát đúng giọng trên thiết bị di động (iPad, Android).
+- **Fallback Cơ chế phát âm**: Thay thế Web Speech API cũ bằng hàm callStudentWithAzure, giữ đảm bảo đóng tài nguyên (synthesizer.close()) chống tràn bộ nhớ trên iPad.
+
 ## [1.13.2] - 2026-08-12
 
 ### Changed (Đã tối ưu)
@@ -180,6 +187,6 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 ---
 *Ghi chú: Phase 1 (MVP) đã hoàn thành và sẵn sàng nghiệm thu.*
 
-### Th�m m?i
-- T�ch h?p API gi?ng d?c mi?n ph� c?a tr�nh duy?t Microsoft Edge (Edge TTS) thay th? cho Vieneu TTS. H? tr? gi?ng Ho�i My v� Nam Minh, cho t?c d? ph?n h?i nhanh hon v� kh�ng c?n t?i model n?ng.
+### Thm m?i
+- Tch h?p API gi?ng d?c mi?n ph c?a trnh duy?t Microsoft Edge (Edge TTS) thay th? cho Vieneu TTS. H? tr? gi?ng Hoi My v Nam Minh, cho t?c d? ph?n h?i nhanh hon v khng c?n t?i model n?ng.
 
