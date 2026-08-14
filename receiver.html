@@ -214,6 +214,10 @@
     <div id="startScreen">
         <button id="startBtn">BẮT ĐẦU CHẾ ĐỘ ĐÓN</button>
         <div class="start-note">Bắt buộc bấm nút này để kích hoạt âm thanh trên trình duyệt</div>
+        <div style="margin-top: 30px; font-size: 20px; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="document.getElementById('useBrowserTts').click()">
+            <input type="checkbox" id="useBrowserTts" style="width: 24px; height: 24px;" checked>
+            <label for="useBrowserTts" style="cursor: pointer;">Dùng giọng đọc có sẵn của trình duyệt (Nhanh, không cần chạy file .bat)</label>
+        </div>
     </div>
 
     <div id="mainScreen">
@@ -331,6 +335,11 @@
                 window.speechSynthesis.speak(utterance);
             };
 
+            const useBrowserTts = document.getElementById('useBrowserTts');
+            if (useBrowserTts && useBrowserTts.checked) {
+                return { play: fallbackPlay };
+            }
+
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -446,7 +455,10 @@
             osc.start();
             osc.stop(ctx.currentTime + 0.001);
 
-            // Xóa dòng speak('') vì nó có thể làm treo SpeechSynthesis trên Edge/Chrome
+            // Mở khóa SpeechSynthesis đồng bộ (synchronous) bằng một câu rỗng volume = 0
+            const unlockUtterance = new SpeechSynthesisUtterance('Xin chào');
+            unlockUtterance.volume = 0;
+            window.speechSynthesis.speak(unlockUtterance);
             
             // Mở khóa HTML5 Audio Player (cho iOS Safari)
             globalAudioPlayer.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; // âm thanh rỗng siêu ngắn
