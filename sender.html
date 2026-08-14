@@ -481,7 +481,7 @@
             if (checkbox) checkbox.checked = ignoreWaitTime;
         });
 
-        let currentTtsUrl = 'http://127.0.0.1:5000';
+        let currentTtsUrl = "";
         database.ref('settings/ttsUrl').on('value', snap => {
             const val = snap.val();
             if (val) currentTtsUrl = val;
@@ -504,6 +504,15 @@
 
         let autoRestartMic = false;
         let wasAutoStopped = false;
+        let globalAudioCtx = null;
+        let sysVoices = [];
+
+        function loadVoices() {
+            sysVoices = window.speechSynthesis.getVoices();
+        }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
         window.toggleAutoRestartMic = function(isChecked) {
             autoRestartMic = isChecked;
             if (!isChecked) wasAutoStopped = false;
@@ -536,7 +545,6 @@
             }
         }, {once: true});
 
-        let globalAudioCtx = null;
 
         function playChime(callback) {
             if (!isStarted || !enableLocalAudio) { if(callback) callback(); return; }
@@ -574,18 +582,48 @@
         let lastSpokenTime = 0;
 
         async function prefetchBlobAndPlay(text) {
-            if (useDeviceTTS || !currentTtsUrl) {
-                console.warn("Đang chờ link AI Voice hoặc đang chọn chế độ thiết bị. Bỏ qua Safari.");
-                return {
-                    play: (onEnd, onError) => {
+            const fallbackPlay = (onEnd, onError) => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                
+                if (sysVoices.length === 0) sysVoices = window.speechSynthesis.getVoices();
+                const hoaiMyVoice = sysVoices.find(v => v.name.includes('HoaiMy') || v.name.includes('NamMinh'));
+                const viVoice = sysVoices.find(v => v.lang.includes('vi') || v.lang.includes('VN'));
+                
+                if (hoaiMyVoice) {
+                    utterance.voice = hoaiMyVoice;
+                } else if (viVoice) {
+                    utterance.voice = viVoice;
+                }
+
+                let isEnded = false;
+                const endHandler = () => {
+                    if (!isEnded) {
+                        isEnded = true;
                         if (onEnd) onEnd();
                     }
                 };
+                utterance.onend = endHandler;
+                utterance.onerror = () => {
+                    if (!isEnded) {
+                        isEnded = true;
+                        if (onError) onError();
+                        else if (onEnd) onEnd();
+                    }
+                };
+                
+                // Failsafe: nếu kẹt quá 10 giây thì ép cho qua câu tiếp theo
+                setTimeout(endHandler, 10000);
+                window.speechSynthesis.speak(utterance);
+            };
+
+            if (useDeviceTTS || !currentTtsUrl) {
+                return { play: fallbackPlay };
             }
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // Tăng timeout lên 30s cho Colab
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
 
                 const baseUrl = currentTtsUrl.replace(/\/+$/, '');
                 const response = await fetch(`${baseUrl}/tts?text=${encodeURIComponent(text)}`, {
@@ -600,24 +638,27 @@
                 
                 if (!response.ok) throw new Error("Network response was not ok");
                 const blob = await response.blob();
+                if (!blob.type.includes('audio')) throw new Error("Not an audio file");
+
                 const url = URL.createObjectURL(blob);
                 
                 return {
                     play: (onEnd, onError) => {
                         globalAudioPlayer.src = url;
                         globalAudioPlayer.onended = onEnd;
-                        globalAudioPlayer.onerror = onError;
-                        globalAudioPlayer.play().catch(onError);
+                        globalAudioPlayer.onerror = (e) => {
+                            console.warn("Audio player error, falling back to TTS", e);
+                            fallbackPlay(onEnd, onError);
+                        };
+                        globalAudioPlayer.play().catch(e => {
+                            console.warn("Play blocked or failed, falling back to TTS", e);
+                            fallbackPlay(onEnd, onError);
+                        });
                     }
                 };
             } catch (error) {
-                console.warn("Lỗi server AI, bỏ qua câu này không dùng giọng Safari:", error);
-                return {
-                    play: (onEnd, onError) => {
-                        // Nếu lỗi thì im lặng chuyển qua câu tiếp theo
-                        if (onEnd) onEnd();
-                    }
-                };
+                console.warn("Lỗi server AI, chuyển sang giọng đọc mặc định của trình duyệt:", error);
+                return { play: fallbackPlay };
             }
         }
 
