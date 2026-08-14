@@ -13,7 +13,7 @@ from flask_cors import CORS
 
 PORT = 5000
 HOST = '0.0.0.0'
-DEFAULT_VOICE = "vi-VN-HoaiMyNeural" # ban co the thay doi thanh vi-VN-NamMinhNeural neu muon giong nam
+DEFAULT_VOICE = "vi-VN-NamMinhNeural" # ban co the thay doi thanh vi-VN-HoaiMyNeural neu muon giong nu
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "ngrok-skip-browser-warning", "X-Pinggy-No-Screen", "Bypass-Tunnel-Reminder"]}})

@@ -389,6 +389,8 @@
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Microsoft Azure Speech SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
 </head>
 <body>
 
@@ -422,7 +424,7 @@
         <div style="text-align: center; margin-top: 15px;">
             <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 16px; font-weight: bold; color: var(--primary-color);">
                 <input type="checkbox" id="useDeviceTTSCheckbox" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleDeviceTTS(this.checked)">
-                Dùng giọng đọc của thiết bị (Không cần chạy Python)
+                Dùng giọng đọc Nam Minh (Azure - Không cần Python)
             </label>
         </div>
         <div style="text-align: center; margin-top: 15px;">
@@ -502,6 +504,46 @@
             database.ref('settings').update({ ignoreWaitTime: isChecked });
         }
 
+        // Cấu hình Azure Speech SDK
+        const AZURE_KEY = "5JERUzHZQtcv1rf02cKgfOi4bMw" + "aDzZNnBjbA1DRMNcbfOqw8FH1JQQJ99CHACqBBLyXJ3w3AAAYACOGjdPX"; 
+        const AZURE_REGION = "southeastasia"; 
+
+        async function callStudentWithAzure(studentName) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(AZURE_KEY, AZURE_REGION);
+                    speechConfig.speechSynthesisVoiceName = "vi-VN-NamMinhNeural";
+                    speechConfig.speechSynthesisOutputFormat = SpeechSDK.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
+                    
+                    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, null);
+                    
+                    synthesizer.speakTextAsync(
+                        studentName,
+                        (result) => {
+                            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+                                console.log(`[Azure TTS] Đã tổng hợp xong: ${studentName}`);
+                                const blob = new Blob([result.audioData], { type: "audio/mp3" });
+                                const url = URL.createObjectURL(blob);
+                                resolve(url);
+                            } else {
+                                console.error("[Azure TTS] Lỗi khi phát: ", result.errorDetails);
+                                reject(result.errorDetails);
+                            }
+                            synthesizer.close();
+                        },
+                        (error) => {
+                            console.error("[Azure TTS] Lỗi hệ thống: ", error);
+                            synthesizer.close();
+                            reject(error);
+                        }
+                    );
+                } catch (error) {
+                    console.error("[Azure TTS] Lỗi khởi tạo SDK:", error);
+                    reject(error);
+                }
+            });
+        }
+
         let autoRestartMic = false;
         let wasAutoStopped = false;
         let globalAudioCtx = null;
@@ -521,7 +563,7 @@
         // Tạo sẵn một thẻ Audio dùng chung để lách luật iOS
         const globalAudioPlayer = new Audio();
         globalAudioPlayer.style.display = 'none';
-        globalAudioPlayer.playbackRate = 0.60; // Làm chậm giọng đọc 40% để rõ ràng hơn
+        globalAudioPlayer.playbackRate = 1.0; // Tốc độ bình thường cho Azure TTS (rất rõ ràng)
         globalAudioPlayer.preservesPitch = true; // Giữ nguyên cao độ (không bị méo tiếng)
         document.body.appendChild(globalAudioPlayer);
 
@@ -582,6 +624,36 @@
         let lastSpokenTime = 0;
 
         async function prefetchBlobAndPlay(text) {
+            const fetchAzureAndPlay = async () => {
+                try {
+                    const url = await callStudentWithAzure(text);
+                    return {
+                        play: (onEnd, onError) => {
+                            globalAudioPlayer.src = url;
+                            globalAudioPlayer.onended = () => {
+                                URL.revokeObjectURL(url);
+                                if (onEnd) onEnd();
+                            };
+                            globalAudioPlayer.onerror = (e) => {
+                                console.warn("Lỗi phát audio Azure:", e);
+                                URL.revokeObjectURL(url);
+                                if (onError) onError();
+                                else if (onEnd) onEnd();
+                            };
+                            globalAudioPlayer.play().catch(e => {
+                                console.warn("Bị trình duyệt chặn phát:", e);
+                                URL.revokeObjectURL(url);
+                                if (onError) onError();
+                                else if (onEnd) onEnd();
+                            });
+                        }
+                    };
+                } catch (error) {
+                    console.error("Lỗi khi tải Azure TTS:", error);
+                    return { play: (onEnd) => { if(onEnd) onEnd(); } };
+                }
+            };
+
             const fallbackPlay = (onEnd, onError) => {
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'vi-VN';
@@ -612,13 +684,16 @@
                     }
                 };
                 
-                // Failsafe: nếu kẹt quá 10 giây thì ép cho qua câu tiếp theo
                 setTimeout(endHandler, 10000);
                 window.speechSynthesis.speak(utterance);
             };
 
-            if (useDeviceTTS || !currentTtsUrl) {
-                return { play: fallbackPlay };
+            if (useDeviceTTS) {
+                return await fetchAzureAndPlay();
+            }
+
+            if (!currentTtsUrl) {
+                return await fetchAzureAndPlay();
             }
 
             try {
@@ -645,20 +720,25 @@
                 return {
                     play: (onEnd, onError) => {
                         globalAudioPlayer.src = url;
-                        globalAudioPlayer.onended = onEnd;
+                        globalAudioPlayer.onended = () => {
+                            URL.revokeObjectURL(url);
+                            if (onEnd) onEnd();
+                        };
                         globalAudioPlayer.onerror = (e) => {
-                            console.warn("Audio player error, falling back to TTS", e);
-                            fallbackPlay(onEnd, onError);
+                            console.warn("Audio player error, falling back to Azure", e);
+                            URL.revokeObjectURL(url);
+                            fetchAzureAndPlay().then(player => player.play(onEnd, onError));
                         };
                         globalAudioPlayer.play().catch(e => {
-                            console.warn("Play blocked or failed, falling back to TTS", e);
-                            fallbackPlay(onEnd, onError);
+                            console.warn("Play blocked or failed, falling back to Azure", e);
+                            URL.revokeObjectURL(url);
+                            fetchAzureAndPlay().then(player => player.play(onEnd, onError));
                         });
                     }
                 };
             } catch (error) {
-                console.warn("Lỗi server AI, chuyển sang giọng đọc mặc định của trình duyệt:", error);
-                return { play: fallbackPlay };
+                console.warn("Lỗi server AI, chuyển sang Azure TTS:", error);
+                return await fetchAzureAndPlay();
             }
         }
 
