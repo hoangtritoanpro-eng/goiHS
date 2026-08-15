@@ -4,6 +4,20 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.15.0] - 2026-08-15
+
+### Added (Thêm mới)
+- **Tách biệt cổng đăng nhập**: Thiết kế lại toàn bộ hệ thống đăng nhập. Trang chủ (`index.html`) nay trở thành Landing Page giới thiệu và phân luồng người dùng (Nhà trường và Phụ huynh).
+- **Giao diện Nhà trường (`login_school.html`)**: Cổng đăng nhập riêng biệt dành cho Ban Giám hiệu và Giám thị, chuyển hướng trực tiếp đến Bảng Điều Khiển (`dashboard.html`).
+- **Giao diện Phụ huynh (`login_parent.html`)**: Cổng đăng nhập dành riêng cho phụ huynh để vào màn hình đón con, giao diện ấm áp với tông màu cam.
+- **Bảng Điều Khiển (`dashboard.html`)**: Menu trung tâm dành cho Nhà trường sau khi đăng nhập, nơi điều hướng đến tính năng Quản trị hoặc Gọi học sinh.
+
+### Changed (Đã tối ưu)
+- **Design System cao cấp**: Cập nhật toàn bộ giao diện (UI) theo hướng giáo dục, chuyên nghiệp, bắt mắt (màu sắc tươi sáng, font chữ Inter, hiệu ứng hover, glassmorphism).
+
+### Removed (Đã xóa)
+- **Xóa bỏ `login.html` cũ**: Do đã được tách thành hai luồng đăng nhập riêng biệt để trải nghiệm tốt hơn.
+
 ## [1.14.0] - 2026-08-14
 
 ### Added (Thêm mới)

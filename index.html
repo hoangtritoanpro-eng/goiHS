@@ -3,107 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#007AFF">
+    <meta name="theme-color" content="#0052cc">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <title>Hệ Thống Gọi Học Sinh (GoiHS)</title>
+    <title>Hệ Thống Gọi Học Sinh (GoiHS) - Landing Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #007AFF;
-            --bg-color: #F2F2F7;
-            --text-color: #1C1C1E;
+            --primary: #0052cc;
+            --primary-light: #e6f0ff;
+            --primary-hover: #003d99;
+            --secondary: #ff9500;
+            --secondary-light: #fff5e5;
+            --secondary-hover: #cc7700;
+            --bg-color: #f7f9fc;
+            --text-main: #172b4d;
+            --text-muted: #6b778c;
+            --card-bg: #ffffff;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 100% 0%, #e6f0ff 0%, transparent 50%),
+                              radial-gradient(circle at 0% 100%, #fff5e5 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+            padding: 20px;
         }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background: #FFF;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+
+        .header {
             text-align: center;
+            margin-bottom: 48px;
+            animation: fadeInDown 0.8s ease-out;
         }
+
+        .logo-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         h1 {
-            margin: 0 0 10px 0;
-            font-size: 28px;
-            color: var(--primary-color);
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            color: var(--text-main);
         }
-        p {
-            color: #8E8E93;
-            margin-bottom: 40px;
-            font-size: 16px;
+
+        p.subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.5;
         }
-        .nav-grid {
+
+        .cards-container {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeInUp 0.8s ease-out;
         }
-        .nav-card {
-            display: block;
-            background-color: #F9F9F9;
-            border: 2px solid #E5E5EA;
-            border-radius: 16px;
-            padding: 25px;
+
+        .role-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 40px 32px;
             text-decoration: none;
-            color: var(--text-color);
-            transition: all 0.2s;
-            text-align: left;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid transparent;
+            transition: var(--transition);
             position: relative;
+            overflow: hidden;
         }
-        .nav-card:hover {
-            border-color: var(--primary-color);
-            background-color: #F0F8FF;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,122,255,0.1);
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
         }
-        .nav-card h2 {
-            margin: 0 0 5px 0;
-            font-size: 20px;
+
+        .role-card.school::before {
+            background-color: var(--primary);
         }
-        .nav-card span {
-            color: #8E8E93;
+
+        .role-card.parent::before {
+            background-color: var(--secondary);
+        }
+
+        .role-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .role-card.school:hover {
+            border-color: var(--primary-light);
+            background-color: #fafbff;
+        }
+
+        .role-card.parent:hover {
+            border-color: var(--secondary-light);
+            background-color: #fffaf5;
+        }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .role-card.school .card-icon {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .role-card.parent .card-icon {
+            background-color: var(--secondary-light);
+            color: var(--secondary);
+        }
+
+        .role-card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .role-card h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .role-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-muted);
             font-size: 14px;
+            animation: fadeIn 1s ease-out 0.5s both;
         }
-        .nav-card.admin { border-left: 6px solid #FF9500; }
-        .nav-card.sender { border-left: 6px solid #007AFF; }
-        .nav-card.receiver { border-left: 6px solid #34C759; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 28px; }
+            .cards-container { grid-template-columns: 1fr; }
+            .role-card { padding: 32px 24px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="header">
+        <div class="logo-icon">📢</div>
         <h1>Hệ Thống Gọi Học Sinh</h1>
-        <p>Chọn giao diện làm việc của bạn</p>
+        <p class="subtitle">Giải pháp số hóa quy trình đón học sinh giờ tan trường an toàn, thông minh và tiện lợi.</p>
+    </div>
 
-        <div class="nav-grid">
-            <a href="admin.html" class="nav-card admin">
-                <h2>Quản Trị (Ban Giám Hiệu)</h2>
-                <span>Thêm/Xóa học sinh, thống kê, xem lịch sử</span>
-            </a>
-            
-            <a href="sender.html" class="nav-card sender">
-                <h2>Điều khiển Trung tâm (Giám thị)</h2>
-                <span>Dùng micro hoặc gõ tên để gọi học sinh, quản lý hàng đợi, tự động phát loa</span>
-            </a>
-            
-            <a href="parent.html" class="nav-card" style="border-left: 6px solid #FF2D55;">
-                <h2>Cổng Phụ Huynh (Parent Portal)</h2>
-                <span>Đăng nhập để gọi đón con bằng giọng nói hoặc gõ tên</span>
-            </a>
-        </div>
+    <div class="cards-container">
+        <a href="login_school.html" class="role-card school">
+            <div class="card-icon">🏫</div>
+            <h2>Dành cho Nhà trường</h2>
+            <p>Đăng nhập dành cho Ban Giám Hiệu quản trị hệ thống và Giám thị điều phối cổng trường.</p>
+        </a>
+
+        <a href="login_parent.html" class="role-card parent">
+            <div class="card-icon">👨‍👩‍👧‍👦</div>
+            <h2>Dành cho Phụ huynh</h2>
+            <p>Đăng nhập để nhận thông báo và xác nhận đón con một cách chủ động, nhanh chóng.</p>
+        </a>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 Bản quyền thuộc về Hệ thống GoiHS. 
     </div>
 
 </body>

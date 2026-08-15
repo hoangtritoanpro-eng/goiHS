@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0052cc">
+    <title>Bảng Điều Khiển - GoiHS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0052cc;
+            --primary-light: #e6f0ff;
+            --secondary: #ff9500;
+            --success: #36b37e;
+            --danger: #ff5630;
+            --bg-color: #f7f9fc;
+            --text-main: #172b4d;
+            --text-muted: #6b778c;
+            --card-bg: #ffffff;
+            --border-radius: 20px;
+            --shadow: 0 8px 24px rgba(9, 30, 66, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .header-bar {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-details h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--text-main);
+        }
+
+        .user-details p {
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .btn-logout {
+            padding: 10px 16px;
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .title-section {
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .title-section h1 {
+            font-size: 32px;
+            margin: 0 0 10px 0;
+        }
+
+        .title-section p {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        .nav-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            box-shadow: var(--shadow);
+            border: 1px solid #ebecf0;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(9, 30, 66, 0.1);
+        }
+
+        .nav-card.admin {
+            border-top: 6px solid var(--secondary);
+        }
+        
+        .nav-card.sender {
+            border-top: 6px solid var(--success);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .nav-card.admin .card-icon {
+            background-color: #fff5e5;
+            color: var(--secondary);
+        }
+
+        .nav-card.sender .card-icon {
+            background-color: #e3fcef;
+            color: var(--success);
+        }
+
+        .nav-card h3 {
+            font-size: 22px;
+            margin: 0 0 8px 0;
+            color: var(--text-main);
+        }
+
+        .nav-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .header-bar { flex-direction: column; gap: 20px; }
+            .nav-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <div class="user-info">
+            <div class="avatar">🏫</div>
+            <div class="user-details">
+                <h2>Ban Giám Hiệu</h2>
+                <p id="userEmailDisplay">admin@truong.edu.vn</p>
+            </div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">Đăng xuất</button>
+    </div>
+
+    <div class="container">
+        <div class="title-section">
+            <h1>Bảng Điều Khiển</h1>
+            <p>Chọn phân hệ chức năng bạn muốn truy cập</p>
+        </div>
+
+        <div class="nav-grid">
+            <a href="admin.html" class="nav-card admin">
+                <div class="card-icon">⚙️</div>
+                <h3>Quản Trị Hệ Thống</h3>
+                <p>Thêm/Xóa học sinh, xem lịch sử, thống kê dữ liệu, và quản lý danh sách Excel.</p>
+            </a>
+            
+            <a href="sender.html" class="nav-card sender">
+                <div class="card-icon">🎙️</div>
+                <h3>Cổng Gọi Học Sinh</h3>
+                <p>Dùng micro nhận diện giọng nói hoặc nhập tên để gọi học sinh ra cổng nhanh chóng.</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra quyền
+        let role = localStorage.getItem('userRole');
+        if (role !== 'school') {
+            // Nếu chưa đăng nhập hoặc không phải school thì về trang chủ
+            window.location.href = 'index.html';
+        }
+
+        // Hiển thị email
+        let email = localStorage.getItem('userEmail');
+        if (email) {
+            document.getElementById('userEmailDisplay').textContent = email;
+        }
+
+        // Xử lý đăng xuất
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

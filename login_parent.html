@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff9500">
+    <title>Đăng Nhập Phụ Huynh - GoiHS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff9500;
+            --primary-hover: #e68600;
+            --bg-color: #fdfaf6;
+            --text-main: #2d1f11;
+            --text-muted: #8c735b;
+            --card-bg: #ffffff;
+            --border-radius: 16px;
+            --input-bg: #fffaf5;
+            --input-border: #f2e1d0;
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, #fff5e5 0%, #fdfaf6 100%);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .login-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.08);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link span {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--input-border);
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.15);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .error-msg {
+            color: #de350b;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <a href="index.html" class="back-link">
+            <span>&larr;</span> Quay lại trang chủ
+        </a>
+        <div class="login-card">
+            <div class="header">
+                <div class="icon">👨‍👩‍👧‍👦</div>
+                <h1>Cổng Phụ Huynh</h1>
+                <p class="subtitle">Đăng nhập để đón con nhanh chóng</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="phone">Số điện thoại hoặc Email</label>
+                    <input type="text" id="phone" required placeholder="09xx.xxx.xxx">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Đăng Nhập</button>
+                <div id="errorMsg" class="error-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+        const loginBtn = document.getElementById('loginBtn');
+
+        // Logic giả lập: Nếu đã có session là parent thì vào thẳng parent.html
+        let currentUserRole = localStorage.getItem('userRole');
+        if (currentUserRole === 'parent') {
+            window.location.href = 'parent.html?v=' + Date.now();
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (phone === '' || password === '') {
+                errorMsg.textContent = 'Vui lòng nhập đầy đủ thông tin.';
+                return;
+            }
+            
+            loginBtn.textContent = 'Đang xác thực...';
+            loginBtn.style.opacity = '0.8';
+            loginBtn.disabled = true;
+
+            // Giả lập delay mạng để thấy UI loading
+            setTimeout(() => {
+                // Đăng nhập giả lập: set role 'parent'
+                localStorage.setItem('userEmail', phone); // Lưu SĐT vào trường email cho tương thích logic cũ
+                localStorage.setItem('userRole', 'parent');
+                window.location.href = 'parent.html?v=' + Date.now();
+            }, 800);
+        });
+    </script>
+</body>
+</html>
