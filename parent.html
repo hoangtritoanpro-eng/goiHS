@@ -260,14 +260,32 @@
         }
 
         function callStudent(id, name, className) {
-            studentsRef.child(id).update({
-                status: 'called',
-                timestamp: Date.now(),
-                lastRecall: Date.now()
-            }).then(() => {
+            const now = Date.now();
+            let updates = {};
+            let calledNames = [name];
+
+            updates[id + '/status'] = 'called';
+            updates[id + '/timestamp'] = now;
+            updates[id + '/lastRecall'] = now;
+
+            const pEmail = currentUserEmail;
+            if (pEmail && studentsList) {
+                for (const sid in studentsList) {
+                    const s = studentsList[sid];
+                    if (sid !== id && s.parentEmail && s.parentEmail.toLowerCase() === pEmail && s.status !== 'completed') {
+                        updates[sid + '/status'] = 'called';
+                        updates[sid + '/timestamp'] = now;
+                        updates[sid + '/lastRecall'] = now;
+                        calledNames.push(s.name);
+                    }
+                }
+            }
+
+            studentsRef.update(updates).then(() => {
                 let msg = '';
+                const namesStr = calledNames.join(', ');
                 if (ignoreWaitTime) {
-                    msg = `Đã gửi yêu cầu đón bé <b>${name}</b> thành công.<br>Loa sẽ phát ngay lập tức.`;
+                    msg = `Đã gửi yêu cầu đón bé <b>${namesStr}</b> thành công.<br>Loa sẽ phát ngay lập tức.`;
                 } else {
                     // Tính toán thời gian
                     let timeStr = '16:20 (Tiểu học)';
@@ -275,7 +293,7 @@
                     if (match && parseInt(match[1]) >= 6) {
                         timeStr = '16:40 (THCS)';
                     }
-                    msg = `Đã gửi yêu cầu đón bé <b>${name}</b> thành công.<br>Loa sẽ phát vào lúc <b>${timeStr}</b>.`;
+                    msg = `Đã gửi yêu cầu đón bé <b>${namesStr}</b> thành công.<br>Loa sẽ phát vào lúc <b>${timeStr}</b>.`;
                 }
 
                 notification.innerHTML = msg;

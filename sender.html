@@ -1486,11 +1486,11 @@
 
             // Auto-call siblings
             const fullStudentData = studentsList[student.id];
-            if (fullStudentData && fullStudentData.parentContact && fullStudentData.parentContact.trim() !== '') {
-                const pContact = fullStudentData.parentContact.trim();
+            if (fullStudentData && fullStudentData.parentEmail && fullStudentData.parentEmail.trim() !== '') {
+                const pContact = fullStudentData.parentEmail.trim();
                 for (const sid in studentsList) {
                     const s = studentsList[sid];
-                    if (sid !== student.id && s.parentContact === pContact && s.status !== 'completed') {
+                    if (sid !== student.id && s.parentEmail === pContact && s.status !== 'completed') {
                         updates[sid + '/status'] = 'called';
                         updates[sid + '/timestamp'] = now;
                         updates[sid + '/lastRecall'] = now;

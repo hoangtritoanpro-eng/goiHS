@@ -5,6 +5,12 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+
+## [1.17.0] - 2026-08-19
+
+### Added (Thêm mới)
+- **Tự động gọi anh/chị/em:** Nâng cấp tính năng gọi học sinh. Giờ đây, khi phụ huynh nhấn đón 1 bé trên Cổng phụ huynh (parent.html) hoặc giáo viên gọi 1 bé trên Cổng gọi tên (sender.html), hệ thống sẽ tự động tìm kiếm các anh/chị/em có cùng số điện thoại (parentEmail) và đồng thời phát loa thông báo đón tất cả các bé cùng lúc.
+
 ## [1.16.0] - 2026-08-19
 
 ### Added (Thêm mới)
