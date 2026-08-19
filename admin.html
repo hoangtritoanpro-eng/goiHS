@@ -228,7 +228,7 @@
         <form class="add-form" id="addForm">
             <input type="text" id="studentName" placeholder="Nhập tên học sinh mới (Ví dụ: Nguyễn Văn A)" required>
             <input type="text" id="studentClass" placeholder="Lớp (Vd: 1A)" style="flex: 0.3;">
-            <input type="text" id="parentContact" placeholder="SĐT Phụ huynh / Mã Gia đình (Tuỳ chọn)" style="flex: 0.5;">
+            <input type="text" id="parentEmail" placeholder="SĐT Phụ huynh / Mã Gia đình (Tuỳ chọn)" style="flex: 0.5;">
             <button type="submit" class="btn btn-add">Thêm Mới</button>
         </form>
 
@@ -305,11 +305,11 @@
             e.preventDefault();
             const input = document.getElementById('studentName');
             const classInput = document.getElementById('studentClass');
-            const contactInput = document.getElementById('parentContact');
+            const contactInput = document.getElementById('parentEmail');
             
             const name = input.value.trim();
             const className = classInput.value.trim() || 'Chưa rõ';
-            const parentContact = contactInput.value.trim().toLowerCase();
+            const parentEmail = contactInput.value.trim().toLowerCase();
             
             if (name) {
                 // Tạo ID ngẫu nhiên hoặc dựa trên timestamp
@@ -320,8 +320,8 @@
                     className: className,
                     status: 'waiting'
                 };
-                if (parentContact) {
-                    data.parentContact = parentContact;
+                if (parentEmail) {
+                    data.parentEmail = parentEmail;
                 }
                 
                 studentsRef.child(id).set(data).then(() => {
@@ -575,7 +575,7 @@
                                 
                                 let studentData = { name: name, className: cleanClass, status: 'waiting' };
                                 if (pContact) {
-                                    studentData.parentContact = pContact;
+                                    studentData.parentEmail = pContact;
                                 }
                                 
                                 updates[id] = studentData;

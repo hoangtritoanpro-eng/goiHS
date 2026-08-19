@@ -4,6 +4,16 @@ Tất cả các thay đổi đáng chú ý của dự án này sẽ được ghi
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+## [1.16.0] - 2026-08-19
+
+### Added (Thêm mới)
+- Tải hàng loạt 13 tệp danh sách học sinh tiểu học lên Firebase bằng script Python tự động (upload_to_firebase.py).
+- Hỗ trợ xử lý trường hợp anh, chị, em có cùng một số điện thoại (tự động mapping parentEmail để hiển thị nhiều học sinh trên cùng một tài khoản phụ huynh).
+
+### Fixed (Sửa lỗi)
+- Sửa lỗi không đồng nhất trường dữ liệu: Cập nhật dmin.html để sử dụng parentEmail thay vì parentContact, đồng bộ với logic kiểm tra của cổng phụ huynh (parent.html).
+
 ## [1.15.0] - 2026-08-15
 
 ### Added (Thêm mới)
